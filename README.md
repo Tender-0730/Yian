@@ -1,29 +1,37 @@
-#  back-stage
+# 颐安养老管理系统 (Yian)
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue 3 + Java 前后端分离的养老院管理系统。
 
-## Recommended IDE Setup
+## 项目结构
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
+```
+Yian/
+├── frontend/        # Vue 3 前端应用
+├── backend/         # Java 后端应用
+├── db.json          # Mock 数据（过渡期使用，后端完成后删除）
 ```
 
-### Compile and Hot-Reload for Development
+## 前端启动
 
 ```sh
+cd frontend
+npm install
 npm run dev
 ```
 
-### Compile and Minify for Production
+## Mock 数据启动（过渡期）
+
+在根目录下运行：
 
 ```sh
-npm run build
+npx json-server --watch db.json --port 3000
+```
+
+> 注意：前端默认代理到 `localhost:8080`（Java 后端），使用 mock 数据时需将 `frontend/vite.config.js` 中的代理目标临时改为 `http://localhost:3000`。
+
+## 后端启动
+
+```sh
+cd backend
+# Java 项目启动命令
 ```
