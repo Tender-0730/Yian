@@ -4,9 +4,6 @@ spring:
   threads:
     virtual:
       enabled: true
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/yian?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
@@ -34,7 +31,9 @@ jwt:
 
 springdoc:
   swagger-ui:
-    enabled: false
+    path: /doc.html
+    tags-sorter: alpha
+    operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
   group-configs:
