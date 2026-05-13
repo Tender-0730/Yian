@@ -155,6 +155,9 @@ public class MealServiceImpl implements MealService {
                 .build()).toList();
     }
 
+    /**
+     * 批量构建 residentId → name 映射，避免分页列表中逐条查询老人姓名（N+1）。
+     */
     private Map<Long, String> buildResidentNameMap(List<MealRecord> records) {
         Set<Long> residentIds = records.stream()
                 .map(MealRecord::getResidentId).collect(Collectors.toSet());

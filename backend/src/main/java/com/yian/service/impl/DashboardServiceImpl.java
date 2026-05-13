@@ -63,6 +63,9 @@ public class DashboardServiceImpl implements DashboardService {
                 .build();
     }
 
+    /**
+     * 统计"特殊护理"人数 — INTENSIVE 是 levelCode 而非主键，需先查 CareLevel 表获取 ID。
+     */
     private long countSpecialCareResidents() {
         List<CareLevel> intensive = careLevelMapper.selectList(
                 new LambdaQueryWrapper<CareLevel>().eq(CareLevel::getLevelCode, INTENSIVE_CARE_CODE));
@@ -78,6 +81,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     private String calcOccupancyRate() {
         long totalBeds = bedMapper.selectCount(null);
+        // 没有床位时避免除以零
         if (totalBeds == 0) {
             return "0%";
         }
@@ -87,6 +91,10 @@ public class DashboardServiceImpl implements DashboardService {
         return String.format("%.1f%%", (double) occupied / totalBeds * 100);
     }
 
+    /**
+     * 构建护理级别分布 — 一次性查出所有 active 记录，在内存中按 careLevelId 分组统计，
+     * 避免对每个护理级别各发一次 COUNT 查询。
+     */
     private List<DistributionItem> buildCareLevelDistribution() {
         List<CareLevel> levels = careLevelMapper.selectList(
                 new LambdaQueryWrapper<CareLevel>().orderByAsc(CareLevel::getSortOrder));

@@ -61,6 +61,7 @@ public class UserServiceImpl implements UserService {
         LoginUser loginUser = getLoginUser();
         SysUser user = sysUserMapper.selectById(loginUser.getUserId());
 
+        // BCrypt.matches 直接比对密文，无需先查出明文
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new BusinessException("原密码错误");
         }

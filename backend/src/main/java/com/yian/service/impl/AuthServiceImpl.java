@@ -16,7 +16,6 @@ import com.yian.security.LoginUser;
 import com.yian.service.AuthService;
 import com.yian.vo.LoginVO;
 import com.yian.vo.UserInfoVO;
-import com.yian.vo.UserInfoVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -80,6 +79,9 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    /**
+     * 注册新用户 — 默认分配 STAFF 角色，密码 BCrypt 加密存储。
+     */
     @Override
     @Transactional
     public void register(RegisterRequest request) {
@@ -102,6 +104,10 @@ public class AuthServiceImpl implements AuthService {
         log.info("新用户注册成功: {}", request.getUsername());
     }
 
+    /**
+     * 用 refreshToken 换取新的 token 对 — 同时签发新 accessToken + 新 refreshToken，
+     * 而不是延长旧 token 的有效期（无状态 JWT 无法撤销，通过轮换降低风险）。
+     */
     @Override
     public LoginVO refreshToken(RefreshTokenRequest request) {
         String refreshToken = request.getRefreshToken();
@@ -111,6 +117,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ResultCode.UNAUTHORIZED.getCode(), "refreshToken无效");
         }
 
+        // 防止用 accessToken 冒充 refreshToken 来刷新
         if (!jwtUtils.isRefreshToken(refreshToken)) {
             throw new BusinessException(ResultCode.UNAUTHORIZED.getCode(), "非法的token类型");
         }
@@ -121,6 +128,7 @@ public class AuthServiceImpl implements AuthService {
         Long userId = jwtUtils.getUserIdFromToken(refreshToken);
         String username = jwtUtils.getUsernameFromToken(refreshToken);
 
+        // 刷新时重新检查用户状态，已被禁用则拒绝
         SysUser user = sysUserMapper.selectById(userId);
         if (user == null || user.getStatus() == 0) {
             throw new BusinessException(ResultCode.UNAUTHORIZED.getCode(), "用户不存在或已被禁用");

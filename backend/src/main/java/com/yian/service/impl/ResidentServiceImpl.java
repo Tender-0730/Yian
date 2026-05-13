@@ -50,6 +50,7 @@ public class ResidentServiceImpl implements ResidentService {
             wrapper.eq(Resident::getStatus, query.getStatus());
         }
 
+        // careLevelId 不在 Resident 表上，需先查中间表 resident_care_level 获取匹配的 residentId 列表，再 IN 查询
         if (query.getCareLevelId() != null) {
             List<Long> ids = residentCareLevelMapper.selectList(
                     new LambdaQueryWrapper<ResidentCareLevel>()
@@ -72,6 +73,7 @@ public class ResidentServiceImpl implements ResidentService {
             return PageResult.of(List.of(), 0, query.getPage(), query.getSize());
         }
 
+        // 批量查出护理级别名称和床位/房间号，一次性组装到 VO，避免逐条查询（N+1）
         List<Long> residentIds = residents.stream().map(Resident::getId).toList();
 
         Map<Long, String> careLevelNameMap = buildCareLevelNameMap(residentIds);
@@ -205,6 +207,9 @@ public class ResidentServiceImpl implements ResidentService {
                 .build()).toList();
     }
 
+    /**
+     * 变更护理级别 — 不直接更新旧记录，而是旧记录失效 + 新增生效记录，保留完整的历史变更轨迹。
+     */
     @Override
     @Transactional
     public void changeCareLevel(Long residentId, Long careLevelId) {
@@ -215,6 +220,7 @@ public class ResidentServiceImpl implements ResidentService {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "护理级别不存在");
         }
 
+        // 将当前生效的护理级别标记为失效
         ResidentCareLevel current = residentCareLevelMapper.selectCurrentByResidentId(residentId);
         if (current != null) {
             current.setStatus(CareLevelStatusEnum.INACTIVE.getCode());
@@ -222,6 +228,7 @@ public class ResidentServiceImpl implements ResidentService {
             residentCareLevelMapper.updateById(current);
         }
 
+        // 插入一条新的生效记录
         ResidentCareLevel newLevel = new ResidentCareLevel();
         newLevel.setResidentId(residentId);
         newLevel.setCareLevelId(careLevelId);
@@ -250,6 +257,10 @@ public class ResidentServiceImpl implements ResidentService {
         return resident;
     }
 
+    /**
+     * 批量构建 residentId → careLevelName 映射。
+     * 两层查找：先查中间表 resident_care_level 得到 careLevelId，再批量查 care_level 表获取名称。
+     */
     private Map<Long, String> buildCareLevelNameMap(List<Long> residentIds) {
         Map<Long, String> result = new HashMap<>();
         List<ResidentCareLevel> careLevels = residentCareLevelMapper.selectList(
@@ -271,6 +282,10 @@ public class ResidentServiceImpl implements ResidentService {
         return result;
     }
 
+    /**
+     * 批量构建 residentId → {roomNumber, bedNumber} 映射。
+     * 三层查找：check_in_record → bed → room，皆用批量查询，避免 N+1。
+     */
     private void buildRoomBedMaps(List<Long> residentIds,
                                    Map<Long, String> roomNumberMap,
                                    Map<Long, String> bedNumberMap) {

@@ -118,6 +118,13 @@ public class RoomServiceImpl implements RoomService {
         log.info("更新房间成功: id={}", id);
     }
 
+    /**
+     * 办理入住 — 在同一事务中同步更新4张表，保证数据一致性：
+     * 1. 创建入住记录
+     * 2. 床位 → OCCUPIED
+     * 3. 房间已占用数 +1
+     * 4. 老人状态 → CHECKED_IN
+     */
     @Override
     @Transactional
     public void checkIn(CheckInRequest request) {
@@ -130,6 +137,7 @@ public class RoomServiceImpl implements RoomService {
         if (bed == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "床位不存在");
         }
+        // 只有空闲床位才能入住，防止并发重复入住
         if (!BedStatusEnum.AVAILABLE.getCode().equals(bed.getStatus())) {
             throw new BusinessException("该床位已被占用");
         }
@@ -161,6 +169,13 @@ public class RoomServiceImpl implements RoomService {
         log.info("办理入住成功: residentId={}, bedId={}", request.getResidentId(), request.getBedId());
     }
 
+    /**
+     * 办理退住 — 入住的逆操作，同步回滚4张表：
+     * 1. 入住记录 → CHECKED_OUT（记录退住日期）
+     * 2. 床位 → AVAILABLE
+     * 3. 房间已占用数 -1（防负数兜底）
+     * 4. 老人状态 → CHECKED_OUT
+     */
     @Override
     @Transactional
     public void checkOut(Long recordId) {
@@ -168,6 +183,7 @@ public class RoomServiceImpl implements RoomService {
         if (record == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "入住记录不存在");
         }
+        // 只有入住中的记录才能退住，防止重复退住
         if (!CheckInStatusEnum.CHECKED_IN.getCode().equals(record.getStatus())) {
             throw new BusinessException("该记录已退住");
         }
@@ -185,6 +201,7 @@ public class RoomServiceImpl implements RoomService {
         Room room = roomMapper.selectById(bed.getRoomId());
         Room updateRoom = new Room();
         updateRoom.setId(room.getId());
+        // Math.max 防止并发或数据异常时 occupied 出现负数
         updateRoom.setOccupied(Math.max(0, room.getOccupied() - 1));
         roomMapper.updateById(updateRoom);
 

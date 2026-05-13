@@ -36,6 +36,6 @@ public class Resident {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
 
-    @TableLogic
+    @TableLogic  // MyBatis-Plus 逻辑删除：deleteById 实际执行 UPDATE is_deleted=1，查询自动拼接 is_deleted=0
     private Integer isDeleted;
 }

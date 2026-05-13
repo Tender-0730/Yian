@@ -31,6 +31,9 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * 生成 accessToken — 含 userId + roleCodes，有效期2小时，用于接口鉴权。
+     */
     public String generateAccessToken(Long userId, String username, List<String> roleCodes) {
         return Jwts.builder()
                 .claims(Map.of("userId", userId, "roleCodes", roleCodes))
@@ -41,6 +44,9 @@ public class JwtUtils {
                 .compact();
     }
 
+    /**
+     * 生成 refreshToken — 含 type=refresh 标记，有效期7天，只用于刷新 accessToken，不能用于业务接口。
+     */
     public String generateRefreshToken(Long userId, String username) {
         return Jwts.builder()
                 .claims(Map.of("userId", userId, "type", "refresh"))
@@ -75,6 +81,9 @@ public class JwtUtils {
         return parseToken(token).get("userId", Long.class);
     }
 
+    /**
+     * 判断 token 是否为 refreshToken — refreshToken 仅用于获取新的 token 对，不能访问业务接口。
+     */
     public boolean isRefreshToken(String token) {
         try {
             return "refresh".equals(parseToken(token).get("type", String.class));

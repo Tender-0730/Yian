@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * 全局异常处理器 — @RestControllerAdvice 统一拦截所有 Controller 抛出的异常，
+ * 保证前端始终收到统一的 Result JSON 响应，不会看到 Tomcat 默认错误页。
+ */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -25,6 +29,9 @@ public class GlobalExceptionHandler {
         return Result.error(e.getCode(), e.getMessage());
     }
 
+    /**
+     * JSON body 校验失败（@Valid + @RequestBody），Spring 抛出 MethodArgumentNotValidException。
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
@@ -33,6 +40,9 @@ public class GlobalExceptionHandler {
         return Result.error(ResultCode.BAD_REQUEST.getCode(), message);
     }
 
+    /**
+     * GET 请求 query 参数校验失败（@Validated on Controller），Spring 抛出 BindException。
+     */
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleBindException(BindException e) {
@@ -55,6 +65,9 @@ public class GlobalExceptionHandler {
         return Result.error(ResultCode.FORBIDDEN);
     }
 
+    /**
+     * 兜底异常 — 不暴露异常详情给前端，只记录日志。
+     */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<Void> handleException(HttpServletRequest request, Exception e) {

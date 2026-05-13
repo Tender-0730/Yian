@@ -22,7 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * JWT 认证过滤器
+ * JWT 认证过滤器 — 继承 OncePerRequestFilter 确保每次请求只执行一次。
+ * 从 Authorization 头解析 Bearer token，校验后在 SecurityContext 中设置认证信息。
+ * 无 token 时不阻塞，交给后续 Security 配置的放行规则处理。
  */
 @Slf4j
 @Component
@@ -38,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = extractToken(request);
 
+        // 无 token 时不拦截，放行给后续过滤器（登录、注册等公开接口由 Security 配置放行）
         if (StrUtil.isBlank(token)) {
             filterChain.doFilter(request, response);
             return;

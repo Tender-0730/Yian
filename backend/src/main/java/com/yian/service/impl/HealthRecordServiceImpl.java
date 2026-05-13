@@ -130,6 +130,7 @@ public class HealthRecordServiceImpl implements HealthRecordService {
         r.setStatus(request.getStatus());
         r.setAbnormal(request.getAbnormal());
         r.setNotes(request.getNotes());
+        // 未传 recordedAt 时默认取当前时间
         r.setRecordedAt(request.getRecordedAt() != null ? request.getRecordedAt() : LocalDateTime.now());
 
         healthRecordMapper.insert(r);
@@ -174,6 +175,9 @@ public class HealthRecordServiceImpl implements HealthRecordService {
         log.info("删除健康记录成功: id={}", id);
     }
 
+    /**
+     * 批量构建 residentId → name 映射，用于在 VO 中显示老人姓名，避免逐条调用 selectNameById（N+1）。
+     */
     private Map<Long, String> buildResidentNameMap(List<HealthRecord> records) {
         Set<Long> residentIds = records.stream()
                 .map(HealthRecord::getResidentId).collect(Collectors.toSet());
