@@ -65,3 +65,6 @@ Thumbs.db
 
 # Spring Boot
 *.env
+
+# Database
+db.json
