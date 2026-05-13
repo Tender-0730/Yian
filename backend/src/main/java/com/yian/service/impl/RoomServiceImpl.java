@@ -7,10 +7,13 @@ import com.yian.common.ResultCode;
 import com.yian.dto.CheckInRequest;
 import com.yian.dto.RoomSaveRequest;
 import com.yian.entity.*;
+import com.yian.enums.BedStatusEnum;
+import com.yian.enums.CheckInStatusEnum;
 import com.yian.enums.ResidentStatusEnum;
 import com.yian.mapper.*;
 import com.yian.service.RoomService;
 import com.yian.vo.BedVO;
+import com.yian.vo.BuildingVO;
 import com.yian.vo.RoomVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +35,20 @@ public class RoomServiceImpl implements RoomService {
     private final ResidentMapper residentMapper;
 
     @Override
-    public List<Building> listBuildings() {
-        return buildingMapper.selectList(
+    @Transactional(readOnly = true)
+    public List<BuildingVO> listBuildings() {
+        List<Building> buildings = buildingMapper.selectList(
                 new LambdaQueryWrapper<Building>().orderByAsc(Building::getId));
+        return buildings.stream().map(b -> BuildingVO.builder()
+                .id(b.getId())
+                .buildingName(b.getBuildingName())
+                .floorCount(b.getFloorCount())
+                .description(b.getDescription())
+                .build()).toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<RoomVO> listRoomsByBuilding(Long buildingId) {
         Building building = buildingMapper.selectById(buildingId);
         List<Room> rooms = roomMapper.selectList(
@@ -59,6 +70,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BedVO> listBedsByRoom(Long roomId) {
         List<Bed> beds = bedMapper.selectByRoomId(roomId);
         return beds.stream().map(b -> BedVO.builder()
@@ -118,7 +130,7 @@ public class RoomServiceImpl implements RoomService {
         if (bed == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "床位不存在");
         }
-        if (!"AVAILABLE".equals(bed.getStatus())) {
+        if (!BedStatusEnum.AVAILABLE.getCode().equals(bed.getStatus())) {
             throw new BusinessException("该床位已被占用");
         }
 
@@ -126,13 +138,13 @@ public class RoomServiceImpl implements RoomService {
         record.setResidentId(request.getResidentId());
         record.setBedId(request.getBedId());
         record.setCheckInDate(request.getCheckInDate());
-        record.setStatus("CHECKED_IN");
+        record.setStatus(CheckInStatusEnum.CHECKED_IN.getCode());
         record.setRemark(request.getRemark());
         checkInRecordMapper.insert(record);
 
         Bed updateBed = new Bed();
         updateBed.setId(request.getBedId());
-        updateBed.setStatus("OCCUPIED");
+        updateBed.setStatus(BedStatusEnum.OCCUPIED.getCode());
         bedMapper.updateById(updateBed);
 
         Room room = roomMapper.selectById(bed.getRoomId());
@@ -156,17 +168,17 @@ public class RoomServiceImpl implements RoomService {
         if (record == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "入住记录不存在");
         }
-        if (!"CHECKED_IN".equals(record.getStatus())) {
+        if (!CheckInStatusEnum.CHECKED_IN.getCode().equals(record.getStatus())) {
             throw new BusinessException("该记录已退住");
         }
 
-        record.setStatus("CHECKED_OUT");
+        record.setStatus(CheckInStatusEnum.CHECKED_OUT.getCode());
         record.setCheckOutDate(LocalDate.now());
         checkInRecordMapper.updateById(record);
 
         Bed updateBed = new Bed();
         updateBed.setId(record.getBedId());
-        updateBed.setStatus("AVAILABLE");
+        updateBed.setStatus(BedStatusEnum.AVAILABLE.getCode());
         bedMapper.updateById(updateBed);
 
         Bed bed = bedMapper.selectById(record.getBedId());

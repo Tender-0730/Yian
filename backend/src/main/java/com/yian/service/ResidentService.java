@@ -3,7 +3,7 @@ package com.yian.service;
 import com.yian.common.PageResult;
 import com.yian.dto.ResidentPageQuery;
 import com.yian.dto.ResidentSaveRequest;
-import com.yian.entity.CareLevel;
+import com.yian.vo.CareLevelVO;
 import com.yian.vo.ResidentDetailVO;
 import com.yian.vo.ResidentVO;
 
@@ -21,7 +21,7 @@ public interface ResidentService {
 
     void deleteResident(Long id);
 
-    List<CareLevel> listCareLevels();
+    List<CareLevelVO> listCareLevels();
 
     void changeCareLevel(Long residentId, Long careLevelId);
 }

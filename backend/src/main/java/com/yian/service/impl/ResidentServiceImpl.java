@@ -10,8 +10,11 @@ import com.yian.common.ResultCode;
 import com.yian.dto.ResidentPageQuery;
 import com.yian.dto.ResidentSaveRequest;
 import com.yian.entity.*;
+import com.yian.enums.CareLevelStatusEnum;
+import com.yian.enums.CheckInStatusEnum;
 import com.yian.mapper.*;
 import com.yian.service.ResidentService;
+import com.yian.vo.CareLevelVO;
 import com.yian.vo.ResidentDetailVO;
 import com.yian.vo.ResidentVO;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,7 @@ public class ResidentServiceImpl implements ResidentService {
     private final RoomMapper roomMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public PageResult<ResidentVO> pageResidents(ResidentPageQuery query) {
         LambdaQueryWrapper<Resident> wrapper = new LambdaQueryWrapper<>();
         if (StrUtil.isNotBlank(query.getName())) {
@@ -50,7 +54,7 @@ public class ResidentServiceImpl implements ResidentService {
             List<Long> ids = residentCareLevelMapper.selectList(
                     new LambdaQueryWrapper<ResidentCareLevel>()
                             .eq(ResidentCareLevel::getCareLevelId, query.getCareLevelId())
-                            .eq(ResidentCareLevel::getStatus, "ACTIVE"))
+                            .eq(ResidentCareLevel::getStatus, CareLevelStatusEnum.ACTIVE.getCode()))
                     .stream().map(ResidentCareLevel::getResidentId).toList();
             if (CollUtil.isEmpty(ids)) {
                 return PageResult.of(List.of(), 0, query.getPage(), query.getSize());
@@ -93,6 +97,7 @@ public class ResidentServiceImpl implements ResidentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResidentDetailVO getResidentById(Long id) {
         Resident resident = residentMapper.selectById(id);
         if (resident == null) {
@@ -186,9 +191,18 @@ public class ResidentServiceImpl implements ResidentService {
     }
 
     @Override
-    public List<CareLevel> listCareLevels() {
-        return careLevelMapper.selectList(
+    @Transactional(readOnly = true)
+    public List<CareLevelVO> listCareLevels() {
+        List<CareLevel> levels = careLevelMapper.selectList(
                 new LambdaQueryWrapper<CareLevel>().orderByAsc(CareLevel::getSortOrder));
+        return levels.stream().map(cl -> CareLevelVO.builder()
+                .id(cl.getId())
+                .levelName(cl.getLevelName())
+                .levelCode(cl.getLevelCode())
+                .description(cl.getDescription())
+                .dailyFee(cl.getDailyFee())
+                .sortOrder(cl.getSortOrder())
+                .build()).toList();
     }
 
     @Override
@@ -203,7 +217,7 @@ public class ResidentServiceImpl implements ResidentService {
 
         ResidentCareLevel current = residentCareLevelMapper.selectCurrentByResidentId(residentId);
         if (current != null) {
-            current.setStatus("INACTIVE");
+            current.setStatus(CareLevelStatusEnum.INACTIVE.getCode());
             current.setExpireDate(LocalDate.now());
             residentCareLevelMapper.updateById(current);
         }
@@ -212,7 +226,7 @@ public class ResidentServiceImpl implements ResidentService {
         newLevel.setResidentId(residentId);
         newLevel.setCareLevelId(careLevelId);
         newLevel.setEffectiveDate(LocalDate.now());
-        newLevel.setStatus("ACTIVE");
+        newLevel.setStatus(CareLevelStatusEnum.ACTIVE.getCode());
         residentCareLevelMapper.insert(newLevel);
 
         log.info("变更老人护理级别成功: residentId={}, careLevelId={}", residentId, careLevelId);
@@ -241,7 +255,7 @@ public class ResidentServiceImpl implements ResidentService {
         List<ResidentCareLevel> careLevels = residentCareLevelMapper.selectList(
                 new LambdaQueryWrapper<ResidentCareLevel>()
                         .in(ResidentCareLevel::getResidentId, residentIds)
-                        .eq(ResidentCareLevel::getStatus, "ACTIVE"));
+                        .eq(ResidentCareLevel::getStatus, CareLevelStatusEnum.ACTIVE.getCode()));
         if (CollUtil.isNotEmpty(careLevels)) {
             Set<Long> clIds = careLevels.stream()
                     .map(ResidentCareLevel::getCareLevelId).collect(Collectors.toSet());
@@ -263,7 +277,7 @@ public class ResidentServiceImpl implements ResidentService {
         List<CheckInRecord> checkIns = checkInRecordMapper.selectList(
                 new LambdaQueryWrapper<CheckInRecord>()
                         .in(CheckInRecord::getResidentId, residentIds)
-                        .eq(CheckInRecord::getStatus, "CHECKED_IN"));
+                        .eq(CheckInRecord::getStatus, CheckInStatusEnum.CHECKED_IN.getCode()));
         if (CollUtil.isEmpty(checkIns)) {
             return;
         }

@@ -9,6 +9,7 @@ import com.yian.common.ResultCode;
 import com.yian.dto.HealthRecordQuery;
 import com.yian.dto.HealthRecordSaveRequest;
 import com.yian.entity.HealthRecord;
+import com.yian.entity.Resident;
 import com.yian.mapper.HealthRecordMapper;
 import com.yian.mapper.ResidentMapper;
 import com.yian.service.HealthRecordService;
@@ -20,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,6 +34,7 @@ public class HealthRecordServiceImpl implements HealthRecordService {
     private final ResidentMapper residentMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public PageResult<HealthRecordVO> pageHealthRecords(HealthRecordQuery query) {
         LambdaQueryWrapper<HealthRecord> wrapper = new LambdaQueryWrapper<>();
         if (query.getResidentId() != null) {
@@ -54,10 +59,12 @@ public class HealthRecordServiceImpl implements HealthRecordService {
             return PageResult.of(List.of(), 0, query.getPage(), query.getSize());
         }
 
+        Map<Long, String> nameMap = buildResidentNameMap(records);
+
         List<HealthRecordVO> vos = records.stream().map(r -> HealthRecordVO.builder()
                 .id(r.getId())
                 .residentId(r.getResidentId())
-                .residentName(residentMapper.selectNameById(r.getResidentId()))
+                .residentName(nameMap.get(r.getResidentId()))
                 .temperature(r.getTemperature())
                 .bloodSystolic(r.getBloodSystolic())
                 .bloodDiastolic(r.getBloodDiastolic())
@@ -77,15 +84,17 @@ public class HealthRecordServiceImpl implements HealthRecordService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public HealthRecordVO getHealthRecordById(Long id) {
         HealthRecord r = healthRecordMapper.selectById(id);
         if (r == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "健康记录不存在");
         }
+        String residentName = residentMapper.selectNameById(r.getResidentId());
         return HealthRecordVO.builder()
                 .id(r.getId())
                 .residentId(r.getResidentId())
-                .residentName(residentMapper.selectNameById(r.getResidentId()))
+                .residentName(residentName)
                 .temperature(r.getTemperature())
                 .bloodSystolic(r.getBloodSystolic())
                 .bloodDiastolic(r.getBloodDiastolic())
@@ -163,5 +172,14 @@ public class HealthRecordServiceImpl implements HealthRecordService {
         }
         healthRecordMapper.deleteById(id);
         log.info("删除健康记录成功: id={}", id);
+    }
+
+    private Map<Long, String> buildResidentNameMap(List<HealthRecord> records) {
+        Set<Long> residentIds = records.stream()
+                .map(HealthRecord::getResidentId).collect(Collectors.toSet());
+        List<Resident> residents = residentMapper.selectNameByIds(
+                residentIds.stream().toList());
+        return residents.stream()
+                .collect(Collectors.toMap(Resident::getId, Resident::getName));
     }
 }

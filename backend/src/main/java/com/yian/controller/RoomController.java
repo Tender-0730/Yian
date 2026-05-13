@@ -3,9 +3,9 @@ package com.yian.controller;
 import com.yian.common.Result;
 import com.yian.dto.CheckInRequest;
 import com.yian.dto.RoomSaveRequest;
-import com.yian.entity.Building;
 import com.yian.service.RoomService;
 import com.yian.vo.BedVO;
+import com.yian.vo.BuildingVO;
 import com.yian.vo.RoomVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,7 +25,7 @@ public class RoomController {
 
     @Operation(summary = "楼栋列表")
     @GetMapping("/buildings")
-    public Result<List<Building>> listBuildings() {
+    public Result<List<BuildingVO>> listBuildings() {
         return Result.success(roomService.listBuildings());
     }
 

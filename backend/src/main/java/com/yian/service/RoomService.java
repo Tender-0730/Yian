@@ -2,15 +2,15 @@ package com.yian.service;
 
 import com.yian.dto.CheckInRequest;
 import com.yian.dto.RoomSaveRequest;
-import com.yian.entity.Building;
 import com.yian.vo.BedVO;
+import com.yian.vo.BuildingVO;
 import com.yian.vo.RoomVO;
 
 import java.util.List;
 
 public interface RoomService {
 
-    List<Building> listBuildings();
+    List<BuildingVO> listBuildings();
 
     List<RoomVO> listRoomsByBuilding(Long buildingId);
 

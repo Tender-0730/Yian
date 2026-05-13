@@ -2,8 +2,6 @@ package com.yian.controller;
 
 import com.yian.common.PageResult;
 import com.yian.common.Result;
-import com.yian.common.PageResult;
-import com.yian.common.Result;
 import com.yian.dto.CareLevelChangeRequest;
 import com.yian.dto.ResidentPageQuery;
 import com.yian.dto.ResidentSaveRequest;

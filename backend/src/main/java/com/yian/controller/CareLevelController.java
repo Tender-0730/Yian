@@ -1,8 +1,8 @@
 package com.yian.controller;
 
 import com.yian.common.Result;
-import com.yian.entity.CareLevel;
 import com.yian.service.ResidentService;
+import com.yian.vo.CareLevelVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class CareLevelController {
 
     @Operation(summary = "护理级别列表")
     @GetMapping
-    public Result<List<CareLevel>> listCareLevels() {
+    public Result<List<CareLevelVO>> listCareLevels() {
         return Result.success(residentService.listCareLevels());
     }
 }

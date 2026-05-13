@@ -10,10 +10,12 @@ import com.yian.dto.MealQuery;
 import com.yian.dto.MealSaveRequest;
 import com.yian.entity.DietaryRestriction;
 import com.yian.entity.MealRecord;
+import com.yian.entity.Resident;
 import com.yian.mapper.DietaryRestrictionMapper;
 import com.yian.mapper.MealRecordMapper;
 import com.yian.mapper.ResidentMapper;
 import com.yian.service.MealService;
+import com.yian.vo.DietaryRestrictionVO;
 import com.yian.vo.MealRecordVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,6 +38,7 @@ public class MealServiceImpl implements MealService {
     private final ResidentMapper residentMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public PageResult<MealRecordVO> pageMeals(MealQuery query) {
         LambdaQueryWrapper<MealRecord> wrapper = new LambdaQueryWrapper<>();
         if (query.getResidentId() != null) {
@@ -54,10 +60,12 @@ public class MealServiceImpl implements MealService {
             return PageResult.of(List.of(), 0, query.getPage(), query.getSize());
         }
 
+        Map<Long, String> nameMap = buildResidentNameMap(records);
+
         List<MealRecordVO> vos = records.stream().map(r -> MealRecordVO.builder()
                 .id(r.getId())
                 .residentId(r.getResidentId())
-                .residentName(residentMapper.selectNameById(r.getResidentId()))
+                .residentName(nameMap.get(r.getResidentId()))
                 .mealDate(r.getMealDate())
                 .mealType(r.getMealType())
                 .content(r.getContent())
@@ -68,15 +76,19 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MealRecordVO> getDailyMeals(LocalDate date) {
         List<MealRecord> records = mealRecordMapper.selectList(
                 new LambdaQueryWrapper<MealRecord>()
                         .eq(MealRecord::getMealDate, date)
                         .orderByAsc(MealRecord::getMealType));
+
+        Map<Long, String> nameMap = buildResidentNameMap(records);
+
         return records.stream().map(r -> MealRecordVO.builder()
                 .id(r.getId())
                 .residentId(r.getResidentId())
-                .residentName(residentMapper.selectNameById(r.getResidentId()))
+                .residentName(nameMap.get(r.getResidentId()))
                 .mealDate(r.getMealDate())
                 .mealType(r.getMealType())
                 .content(r.getContent())
@@ -132,7 +144,26 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public List<DietaryRestriction> getResidentRestrictions(Long residentId) {
-        return dietaryRestrictionMapper.selectByResidentId(residentId);
+    @Transactional(readOnly = true)
+    public List<DietaryRestrictionVO> getResidentRestrictions(Long residentId) {
+        List<DietaryRestriction> restrictions = dietaryRestrictionMapper.selectByResidentId(residentId);
+        return restrictions.stream().map(r -> DietaryRestrictionVO.builder()
+                .id(r.getId())
+                .residentId(r.getResidentId())
+                .restriction(r.getRestriction())
+                .description(r.getDescription())
+                .build()).toList();
+    }
+
+    private Map<Long, String> buildResidentNameMap(List<MealRecord> records) {
+        Set<Long> residentIds = records.stream()
+                .map(MealRecord::getResidentId).collect(Collectors.toSet());
+        if (CollUtil.isEmpty(residentIds)) {
+            return Map.of();
+        }
+        List<Resident> residents = residentMapper.selectNameByIds(
+                residentIds.stream().toList());
+        return residents.stream()
+                .collect(Collectors.toMap(Resident::getId, Resident::getName));
     }
 }

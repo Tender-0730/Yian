@@ -3,7 +3,7 @@ package com.yian.service;
 import com.yian.common.PageResult;
 import com.yian.dto.MealQuery;
 import com.yian.dto.MealSaveRequest;
-import com.yian.entity.DietaryRestriction;
+import com.yian.vo.DietaryRestrictionVO;
 import com.yian.vo.MealRecordVO;
 
 import java.time.LocalDate;
@@ -21,5 +21,5 @@ public interface MealService {
 
     void deleteMeal(Long id);
 
-    List<DietaryRestriction> getResidentRestrictions(Long residentId);
+    List<DietaryRestrictionVO> getResidentRestrictions(Long residentId);
 }

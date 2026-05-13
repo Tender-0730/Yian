@@ -5,7 +5,6 @@ import com.yian.dto.ChangePasswordRequest;
 import com.yian.dto.UpdateProfileRequest;
 import com.yian.entity.SysUser;
 import com.yian.mapper.SysUserMapper;
-import com.yian.mapper.SysUserRoleMapper;
 import com.yian.security.LoginUser;
 import com.yian.service.UserService;
 import com.yian.vo.UserProfileVO;
@@ -16,18 +15,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final SysUserMapper sysUserMapper;
-    private final SysUserRoleMapper sysUserRoleMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional(readOnly = true)
     public UserProfileVO getProfile() {
         LoginUser loginUser = getLoginUser();
         SysUser user = sysUserMapper.selectById(loginUser.getUserId());

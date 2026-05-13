@@ -2,6 +2,9 @@ package com.yian.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yian.entity.*;
+import com.yian.enums.BedStatusEnum;
+import com.yian.enums.CareLevelStatusEnum;
+import com.yian.enums.ResidentStatusEnum;
 import com.yian.mapper.*;
 import com.yian.service.DashboardService;
 import com.yian.vo.DashboardStatsVO;
@@ -9,9 +12,11 @@ import com.yian.vo.DashboardStatsVO.DistributionItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -19,17 +24,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
+    private static final String INTENSIVE_CARE_CODE = "INTENSIVE";
+
     private final ResidentMapper residentMapper;
     private final ResidentCareLevelMapper residentCareLevelMapper;
     private final CareLevelMapper careLevelMapper;
     private final BedMapper bedMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public DashboardStatsVO getStats() {
         long totalResidents = residentMapper.selectCount(null);
 
         long checkedInCount = residentMapper.selectCount(
-                new LambdaQueryWrapper<Resident>().eq(Resident::getStatus, "CHECKED_IN"));
+                new LambdaQueryWrapper<Resident>()
+                        .eq(Resident::getStatus, ResidentStatusEnum.CHECKED_IN.getCode()));
 
         long specialCareCount = countSpecialCareResidents();
 
@@ -56,7 +65,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     private long countSpecialCareResidents() {
         List<CareLevel> intensive = careLevelMapper.selectList(
-                new LambdaQueryWrapper<CareLevel>().eq(CareLevel::getLevelCode, "INTENSIVE"));
+                new LambdaQueryWrapper<CareLevel>().eq(CareLevel::getLevelCode, INTENSIVE_CARE_CODE));
         if (intensive.isEmpty()) {
             return 0;
         }
@@ -64,7 +73,7 @@ public class DashboardServiceImpl implements DashboardService {
         return residentCareLevelMapper.selectCount(
                 new LambdaQueryWrapper<ResidentCareLevel>()
                         .eq(ResidentCareLevel::getCareLevelId, intensiveId)
-                        .eq(ResidentCareLevel::getStatus, "ACTIVE"));
+                        .eq(ResidentCareLevel::getStatus, CareLevelStatusEnum.ACTIVE.getCode()));
     }
 
     private String calcOccupancyRate() {
@@ -73,7 +82,8 @@ public class DashboardServiceImpl implements DashboardService {
             return "0%";
         }
         long occupied = bedMapper.selectCount(
-                new LambdaQueryWrapper<Bed>().eq(Bed::getStatus, "OCCUPIED"));
+                new LambdaQueryWrapper<Bed>()
+                        .eq(Bed::getStatus, BedStatusEnum.OCCUPIED.getCode()));
         return String.format("%.1f%%", (double) occupied / totalBeds * 100);
     }
 
@@ -81,15 +91,23 @@ public class DashboardServiceImpl implements DashboardService {
         List<CareLevel> levels = careLevelMapper.selectList(
                 new LambdaQueryWrapper<CareLevel>().orderByAsc(CareLevel::getSortOrder));
 
-        List<DistributionItem> items = new ArrayList<>();
-        for (CareLevel cl : levels) {
-            long cnt = residentCareLevelMapper.selectCount(
+        Set<Long> levelIds = levels.stream().map(CareLevel::getId).collect(Collectors.toSet());
+        final Map<Long, Long> countMap;
+        if (!levelIds.isEmpty()) {
+            List<ResidentCareLevel> activeRecords = residentCareLevelMapper.selectList(
                     new LambdaQueryWrapper<ResidentCareLevel>()
-                            .eq(ResidentCareLevel::getCareLevelId, cl.getId())
-                            .eq(ResidentCareLevel::getStatus, "ACTIVE"));
-            items.add(DistributionItem.builder().name(cl.getLevelName()).value(cnt).build());
+                            .in(ResidentCareLevel::getCareLevelId, levelIds)
+                            .eq(ResidentCareLevel::getStatus, CareLevelStatusEnum.ACTIVE.getCode()));
+            countMap = activeRecords.stream()
+                    .collect(Collectors.groupingBy(ResidentCareLevel::getCareLevelId, Collectors.counting()));
+        } else {
+            countMap = Map.of();
         }
-        return items;
+
+        return levels.stream().map(cl -> DistributionItem.builder()
+                .name(cl.getLevelName())
+                .value(countMap.getOrDefault(cl.getId(), 0L))
+                .build()).toList();
     }
 
     private List<DistributionItem> buildAgeDistribution() {
