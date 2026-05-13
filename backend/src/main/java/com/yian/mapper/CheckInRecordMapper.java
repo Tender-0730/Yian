@@ -11,4 +11,7 @@ public interface CheckInRecordMapper extends BaseMapper<CheckInRecord> {
 
     @Select("SELECT * FROM check_in_record WHERE resident_id = #{residentId} AND status = 'CHECKED_IN' LIMIT 1")
     CheckInRecord selectCurrentByResidentId(@Param("residentId") Long residentId);
+
+    @Select("SELECT * FROM check_in_record WHERE bed_id = #{bedId} AND status = 'CHECKED_IN' LIMIT 1")
+    CheckInRecord selectCurrentByBedId(@Param("bedId") Long bedId);
 }

@@ -1,0 +1,22 @@
+package com.yian.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+@Data
+public class RoomSaveRequest {
+    @NotNull(message = "楼栋ID不能为空")
+    private Long buildingId;
+
+    @NotNull(message = "楼层不能为空")
+    private Integer floor;
+
+    @NotBlank(message = "房间号不能为空")
+    private String roomNumber;
+
+    private String roomType;
+    private Integer capacity;
+    private String status;
+    private String description;
+}
