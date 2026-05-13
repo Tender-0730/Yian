@@ -4,6 +4,7 @@ import com.yian.dto.LoginRequest;
 import com.yian.dto.RefreshTokenRequest;
 import com.yian.dto.RegisterRequest;
 import com.yian.vo.LoginVO;
+import com.yian.vo.UserInfoVO;
 
 public interface AuthService {
 
@@ -12,4 +13,6 @@ public interface AuthService {
     void register(RegisterRequest request);
 
     LoginVO refreshToken(RefreshTokenRequest request);
+
+    UserInfoVO me();
 }

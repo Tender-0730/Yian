@@ -8,12 +8,9 @@ INSERT INTO sys_role (role_name, role_code, description) VALUES
 ('护理人员',   'NURSE',  '护理记录、健康记录操作权限'),
 ('普通员工',   'STAFF',  '信息查看权限');
 
--- 管理员账号
--- 用户名: admin
--- 密码: admin123
--- BCrypt: $2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi
+-- 管理员账号（用户名: admin，密码: admin123）
 INSERT INTO sys_user (username, password, real_name, status) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', '系统管理员', 1);
+('admin', '$2a$12$WIsroWZ/f6NHOg/Or/UPV.tFWlrdh/rsop8eDc1UrJ6b44NLtfzkO', '系统管理员', 1);
 
 -- 管理员角色关联
 INSERT INTO sys_user_role (user_id, role_id) VALUES (1, 1);

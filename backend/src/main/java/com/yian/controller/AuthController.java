@@ -5,6 +5,7 @@ import com.yian.dto.LoginRequest;
 import com.yian.dto.RefreshTokenRequest;
 import com.yian.dto.RegisterRequest;
 import com.yian.vo.LoginVO;
+import com.yian.vo.UserInfoVO;
 import com.yian.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,8 +42,7 @@ public class AuthController {
 
     @Operation(summary = "获取当前用户信息")
     @GetMapping("/me")
-    public Result<Void> me() {
-        // TODO: 返回当前登录用户信息
-        return Result.success();
+    public Result<UserInfoVO> me() {
+        return Result.success(authService.me());
     }
 }
