@@ -188,8 +188,16 @@ public class ResidentServiceImpl implements ResidentService {
         if (existing == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "老人不存在");
         }
+
+        // 级联清理关联数据，避免孤立记录导致页面显示空名
+        checkInRecordMapper.delete(new LambdaQueryWrapper<CheckInRecord>().eq(CheckInRecord::getResidentId, id));
+        residentCareLevelMapper.delete(new LambdaQueryWrapper<ResidentCareLevel>().eq(ResidentCareLevel::getResidentId, id));
+        healthRecordMapper.delete(new LambdaQueryWrapper<HealthRecord>().eq(HealthRecord::getResidentId, id));
+        mealRecordMapper.delete(new LambdaQueryWrapper<MealRecord>().eq(MealRecord::getResidentId, id));
+        dietaryRestrictionMapper.delete(new LambdaQueryWrapper<DietaryRestriction>().eq(DietaryRestriction::getResidentId, id));
+
         residentMapper.deleteById(id);
-        log.info("删除老人成功: id={}", id);
+        log.info("删除老人及关联数据成功: id={}", id);
     }
 
     @Override
