@@ -1,83 +1,144 @@
 <script setup>
-import PageContainer from "@/components/PageContainer.vue";
-import { ref } from "vue";
-import { useUserStore } from "@/stores/user";
-import axios from "axios";
-import { ElMessage } from "element-plus";
+import { ref, reactive, onMounted, computed } from 'vue'
+import { ElMessage } from 'element-plus'
+import { getProfile, updateProfile } from '@/api/user'
+import { useUserStore } from '@/stores/user'
 
-// 是在使用仓库中数据的初始值 (无需响应式) 解构无问题
-const {
-  user: { username, nickname, email, password },
-} = useUserStore();
-const formRef = ref();
-const form = ref({
-  username,
-  nickname,
-  email,
-  password,
-});
-const rules = ref({
-  nickname: [
-    { required: true, message: "请输入用户昵称", trigger: "blur" },
-    {
-      pattern: /^\S{2,10}/,
-      message: "昵称长度在2-10个非空字符",
-      trigger: "blur",
-    },
-  ],
-  email: [
-    { required: true, message: "请输入用户邮箱", trigger: "blur" },
-    {
-      type: "email",
-      message: "请输入正确的邮箱格式",
-      trigger: ["blur"],
-    },
-  ],
-});
-// 提交修改
-const submitForm = async () => {
-  // 等待校验结果
-  await formRef.value.validate();
-  // 提交修改
-  const res = await axios.get("/api/userList");
-  const id = res.data.find((item) => item.username === username).id;
-  const user = res.data.some((item) => item.username === username);
-  // console.log(user);
-  if (user) {
-    await axios.put(`/api/userList/${id}`, form.value);
-    ElMessage.success("修改成功");
-    // 清空表单
-    form.value = {
-      username,
-      nickname: "",
-      email: "",
-    };
+const userStore = useUserStore()
+const loading = ref(false)
+const formRef = ref(null)
+
+const form = reactive({
+  realName: '',
+  phone: '',
+  email: '',
+  gender: null
+})
+
+const avatarText = computed(() => {
+  const name = form.realName || userStore.username || 'U'
+  return name.charAt(0)
+})
+
+const rules = {
+  realName: [{ required: true, message: '真实姓名不能为空', trigger: 'blur' }]
+}
+
+const handleSubmit = async () => {
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+  loading.value = true
+  try {
+    await updateProfile(form)
+    userStore.setProfile({ realName: form.realName, phone: form.phone, email: form.email, gender: form.gender })
+    ElMessage.success('资料修改成功')
+  } finally {
+    loading.value = false
   }
-};
+}
+
+onMounted(async () => {
+  try {
+    const data = await getProfile()
+    Object.assign(form, { realName: data.realName, phone: data.phone, email: data.email, gender: data.gender })
+  } catch { /* 错误已统一处理 */ }
+})
 </script>
 
 <template>
-  <page-container title="基本资料">
-    <!-- 表单部分 -->
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-      <el-form-item label="登录名称">
-        <el-input v-model="form.username" disabled></el-input>
-      </el-form-item>
-      <el-form-item label="用户昵称" prop="nickname">
-        <el-input v-model="form.nickname"></el-input>
-      </el-form-item>
-      <el-form-item label="用户邮箱" prop="email">
-        <el-input v-model="form.email"></el-input>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="submitForm">提交修改</el-button>
-      </el-form-item>
-    </el-form>
-  </page-container>
+  <div class="profile-page">
+    <div class="profile-card">
+      <!-- 头像区域 -->
+      <div class="avatar-section">
+        <div class="avatar">{{ avatarText }}</div>
+        <div class="avatar-info">
+          <div class="avatar-name">{{ form.realName || userStore.username }}</div>
+          <div class="avatar-role">系统用户</div>
+        </div>
+      </div>
+
+      <!-- 表单 -->
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px" size="default" class="profile-form">
+        <el-form-item label="用户名">
+          <el-input :model-value="userStore.username" disabled />
+        </el-form-item>
+        <el-form-item label="真实姓名" prop="realName">
+          <el-input v-model="form.realName" placeholder="请输入真实姓名" />
+        </el-form-item>
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="手机号">
+              <el-input v-model="form.phone" placeholder="请输入手机号" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="邮箱">
+              <el-input v-model="form.email" placeholder="请输入邮箱" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="性别">
+          <el-select v-model="form.gender" style="width: 120px">
+            <el-option label="男" :value="1" />
+            <el-option label="女" :value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :loading="loading" @click="handleSubmit">保存修改</el-button>
+          <el-button @click="formRef.resetFields()">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+  </div>
 </template>
 
-<style scoped>
-.el-input {
-  width: 400px;
+<style lang="scss" scoped>
+.profile-page {
+  animation: fadeIn 0.35s ease;
+  max-width: 600px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #ebeef5;
+  overflow: hidden;
+}
+
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 32px 32px 24px;
+  background: linear-gradient(135deg, #ecf5ff 0%, #e8f9e8 100%);
+  border-bottom: 1px solid #ebeef5;
+
+  .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .avatar-info {
+    .avatar-name { font-size: 20px; font-weight: 600; color: #303133; }
+    .avatar-role { font-size: 13px; color: #909399; margin-top: 2px; }
+  }
+}
+
+.profile-form {
+  padding: 24px 32px;
 }
 </style>

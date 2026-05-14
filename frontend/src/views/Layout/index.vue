@@ -1,124 +1,97 @@
 <script setup>
+import { computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ElMessageBox } from 'element-plus'
+import { useUserStore } from '@/stores/user'
 import {
-  Shop,
-  UserFilled,
-  User,
-  Crop,
-  EditPen,
-  Postcard,
-  Message,
-  HomeFilled,
-  CaretBottom,
-  SwitchButton,
-} from "@element-plus/icons-vue";
-import { ElMessageBox } from "element-plus";
-import { useRouter } from "vue-router";
-import { useUserStore } from "@/stores/user";
-const userStore = useUserStore();
-const router = useRouter();
-// 下拉跳转
-const handleCommand = async (key) => {
-  if (key === "logout") {
-    // 退出操作
-    await ElMessageBox.confirm("你确认要进行退出么", "温馨提示", {
-      type: "warning",
-      confirmButtonText: "确认",
-      cancelButtonText: "取消",
-    });
+  Odometer, User, OfficeBuilding, FirstAidKit, Dish,
+  UserFilled, EditPen, SwitchButton
+} from '@element-plus/icons-vue'
 
-    // 清除本地的数据 (user信息)
-    userStore.setUser({});
-    router.push("/login");
+const userStore = useUserStore()
+const router = useRouter()
+const route = useRoute()
+
+const iconMap = { Odometer, User, OfficeBuilding, FirstAidKit, Dish, UserFilled, EditPen }
+
+const menuItems = computed(() =>
+  router.options.routes
+    .find(r => r.path === '/')
+    .children
+    .filter(r => !r.meta?.hidden)
+    .map(r => ({ path: `/${r.path}`, title: r.meta?.title, icon: r.meta?.icon }))
+)
+
+const activeMenu = computed(() => route.path)
+
+const breadcrumbs = computed(() => {
+  const items = route.matched.filter(r => r.meta?.title)
+  return [{ title: '首页', path: '/dashboard' }, ...items.map(r => ({ title: r.meta.title, path: r.path }))]
+})
+
+const avatarText = computed(() => {
+  const name = userStore.realName || userStore.username || 'U'
+  return name.charAt(0)
+})
+
+const handleCommand = async (key) => {
+  if (key === 'logout') {
+    await ElMessageBox.confirm('你确认要退出吗？', '温馨提示', {
+      type: 'warning', confirmButtonText: '确认', cancelButtonText: '取消'
+    })
+    userStore.logout()
+    router.push('/login')
   } else {
-    // 跳转操作
-    router.push(`/${key}`);
+    router.push(`/${key}`)
   }
-};
+}
 </script>
 
 <template>
-  <div class="common-layout">
+  <div class="layout">
     <el-container>
-      <el-header>
-        <div class="header">
-          <div class="logo-container">
-            <img src="@/assets/images/logo3.png" alt="" />
-          </div>
-          <div class="username-container">
-            <span class="username">用户名：{{ userStore.user.username }}</span>
-          </div>
+      <el-header class="layout-header">
+        <div class="header-left">
+          <img src="@/assets/images/logo3.png" alt="logo" class="logo" />
+          <span class="system-name">颐安养老管理系统</span>
         </div>
-
-        <el-dropdown placement="bottom-end" @command="handleCommand">
-          <!-- 展示给用户，默认看到的 -->
-          <span class="el-dropdown__box">
-            <!-- <el-avatar src="@/assets/images/微信图片_20240618110446.jpg" /> -->
-            <img src="@/assets/images/微信图片_20240618110446.jpg" alt="" />
-            <el-icon><CaretBottom /></el-icon>
-          </span>
-
-          <!-- 折叠的下拉部分 -->
+        <el-dropdown trigger="click" @command="handleCommand">
+          <div class="user-trigger">
+            <span class="avatar">{{ avatarText }}</span>
+            <span class="username">{{ userStore.realName || userStore.username }}</span>
+            <el-icon class="arrow"><component :is="SwitchButton" style="transform: rotate(180deg)" /></el-icon>
+          </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="profile" :icon="User"
-                >基本资料</el-dropdown-item
-              >
-              <!-- <el-dropdown-item command="avatar" :icon="Crop"
-                >更换头像</el-dropdown-item
-              > -->
-              <el-dropdown-item command="password" :icon="EditPen"
-                >重置密码</el-dropdown-item
-              >
-              <el-dropdown-item command="logout" :icon="SwitchButton"
-                >退出登录</el-dropdown-item
-              >
+              <el-dropdown-item command="profile" :icon="UserFilled">个人资料</el-dropdown-item>
+              <el-dropdown-item command="password" :icon="EditPen">修改密码</el-dropdown-item>
+              <el-dropdown-item divided command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
       </el-header>
-      <el-container>
-        <el-aside width="200px">
-          <el-menu default-active="home" class="el-menu-vertical-demo" router>
-            <el-menu-item index="home">
-              <el-icon><HomeFilled /></el-icon>
-              <span>首页</span>
+      <el-container class="layout-body">
+        <el-aside width="220px" class="layout-aside">
+          <el-menu :default-active="activeMenu" router class="side-menu">
+            <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
+              <el-icon><component :is="iconMap[item.icon]" /></el-icon>
+              <span>{{ item.title }}</span>
             </el-menu-item>
-            <el-menu-item index="message">
-              <el-icon><Shop /></el-icon>
-              <span>信息管理</span>
-            </el-menu-item>
-            <el-menu-item index="nurse">
-              <el-icon><User /></el-icon>
-              <span>护理管理</span>
-            </el-menu-item>
-            <el-menu-item index="putup">
-              <el-icon><Postcard /></el-icon>
-              <span>住宿管理</span>
-            </el-menu-item>
-            <el-menu-item index="meals">
-              <el-icon><Message /></el-icon>
-              <span>膳食管理</span>
-            </el-menu-item>
-            <el-sub-menu index="/user">
-              <!-- 多级菜单的标题 - 具名插槽 title -->
-              <template #title>
-                <el-icon><UserFilled /></el-icon>
-                <span>个人中心</span>
-              </template>
-              <!-- 展开的内容 - 默认插槽 -->
-              <el-menu-item index="/profile">
-                <el-icon><User /></el-icon>
-                <span>基本资料</span>
-              </el-menu-item>
-              <el-menu-item index="/password">
-                <el-icon><EditPen /></el-icon>
-                <span>重置密码</span>
-              </el-menu-item>
-            </el-sub-menu>
           </el-menu>
         </el-aside>
-        <el-main>
-          <router-view></router-view>
+        <el-main class="layout-main">
+          <el-breadcrumb separator="/" class="breadcrumb">
+            <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path" :to="{ path: item.path }">
+              {{ item.title }}
+            </el-breadcrumb-item>
+          </el-breadcrumb>
+          <div class="page-content">
+            <router-view v-slot="{ Component }">
+              <transition name="fade" mode="out-in">
+                <component :is="Component" />
+              </transition>
+            </router-view>
+          </div>
         </el-main>
       </el-container>
     </el-container>
@@ -126,82 +99,110 @@ const handleCommand = async (key) => {
 </template>
 
 <style lang="scss" scoped>
-.el-header {
+.layout {
+  min-height: 100vh;
+  background: #f0f2f5;
+}
+
+.layout-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 60px;
-  line-height: 60px;
-  background-color: #f6f6f6;
+  background: #fff;
+  border-bottom: 1px solid #ebeef5;
+  padding: 0 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 
-  // 左侧 logo 和用户名样式
-  div {
+  .header-left {
     display: flex;
     align-items: center;
-    justify-content: center;
-
-    img {
-      object-fit: cover;
-      width: 100px;
-      margin-left: 15px;
-    }
-
-    span {
-      margin-left: 10px;
-      font-size: 14px;
-
-      color: #333;
-    }
+    gap: 12px;
+    .logo { width: 36px; height: 36px; }
+    .system-name { font-size: 18px; font-weight: 600; color: #303133; letter-spacing: 0.5px; }
   }
 
-  // 右侧下拉菜单样式
-  .el-dropdown__box {
+  .user-trigger {
     display: flex;
     align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 6px;
+    transition: background 0.2s;
 
-    .el-icon {
-      color: #999;
-      margin-left: 10px;
-    }
-    img {
-      width: 50px;
-      height: 50px;
+    &:hover { background: #f5f7fa; }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      object-fit: cover;
+      background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
     }
-    &:active,
-    &:focus {
-      outline: none;
+
+    .username { font-size: 14px; color: #303133; }
+    .arrow { font-size: 12px; color: #909399; }
+  }
+}
+
+.layout-body { height: calc(100vh - 60px); }
+
+.layout-aside {
+  background: #fff;
+  border-right: 1px solid #ebeef5;
+  overflow-y: auto;
+
+  .side-menu {
+    border-right: none;
+    padding-top: 8px;
+
+    .el-menu-item {
+      margin: 2px 8px;
+      border-radius: 8px;
+      height: 44px;
+      line-height: 44px;
+      transition: all 0.2s;
+
+      &:hover { background: #ecf5ff; color: #409eff; }
+      &.is-active { background: linear-gradient(135deg, #ecf5ff 0%, #e8f9e8 100%); color: #409eff; font-weight: 600; }
     }
   }
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.layout-main {
+  background: #f0f2f5;
+  padding: 16px 20px 20px;
+  overflow-y: auto;
 
-  .logo-container {
-    display: flex;
-    align-items: center;
+  .breadcrumb {
+    margin-bottom: 16px;
+    padding: 10px 16px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
-  .username-container {
-    position: absolute; // 使用绝对定位
-    left: 20%; // 水平居中
-    transform: translateX(-50%); // 向左偏移自身宽度的一半
-
-    .username {
-      display: flex;
-      align-items: center;
-      height: 40px;
-      padding: 0 15px;
-      font-size: 16px;
-      font-weight: 500;
-      // color: #409eff;
-      // background: #ecf5ff;
-      // border-radius: 20px;
-    }
+  .page-content {
+    min-height: calc(100vh - 160px);
   }
+}
+
+/* 页面切换动画 */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>
