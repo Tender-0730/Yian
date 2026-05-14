@@ -94,15 +94,15 @@ onMounted(async () => {
     <div class="search-bar">
       <el-form :model="query" inline>
         <el-form-item label="老人">
-          <el-select v-model="query.residentId" placeholder="全部" clearable filterable style="width: 150px">
+          <el-select v-model="query.residentId" placeholder="全部" clearable filterable class="search-input">
             <el-option v-for="r in residents" :key="r.id" :label="r.name" :value="r.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="日期">
-          <el-date-picker v-model="query.mealDate" type="date" placeholder="选择日期" style="width: 140px" />
+          <el-date-picker v-model="query.mealDate" type="date" placeholder="选择日期" class="search-date" />
         </el-form-item>
         <el-form-item label="餐别">
-          <el-select v-model="query.mealType" placeholder="全部" clearable style="width: 100px">
+          <el-select v-model="query.mealType" placeholder="全部" clearable class="search-select">
             <el-option v-for="o in mealTypeOptions" :key="o.value" :label="o.label" :value="o.value" />
           </el-select>
         </el-form-item>
@@ -120,8 +120,8 @@ onMounted(async () => {
         <template #empty>
           <el-empty description="暂无膳食记录" />
         </template>
-        <el-table-column prop="residentName" label="老人" width="90" />
-        <el-table-column prop="mealDate" label="日期" width="110" />
+        <el-table-column prop="residentName" label="老人" min-width="90" />
+        <el-table-column prop="mealDate" label="日期" min-width="100" />
         <el-table-column prop="mealType" label="餐别" width="80">
           <template #default="{ row }">
             <el-tag
@@ -210,6 +210,10 @@ onMounted(async () => {
   padding: 16px 20px 0;
   border-radius: 10px;
   border: 1px solid #ebeef5;
+
+  .search-input { width: 150px; }
+  .search-select { width: 100px; }
+  .search-date { width: 140px; }
 }
 
 .table-card {

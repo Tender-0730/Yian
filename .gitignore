@@ -19,6 +19,7 @@ coverage
 
 docx/
 .claude
+.playwright-mcp
 
 # Editor directories and files
 frontend/.vscode/*

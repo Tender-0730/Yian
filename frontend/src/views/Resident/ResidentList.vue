@@ -89,16 +89,16 @@ onMounted(async () => {
     <div class="search-bar">
       <el-form :model="query" inline>
         <el-form-item label="姓名">
-          <el-input v-model="query.name" placeholder="输入姓名" clearable style="width: 160px" />
+          <el-input v-model="query.name" placeholder="输入姓名" clearable class="search-input" />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="query.status" placeholder="全部" clearable style="width: 120px">
+          <el-select v-model="query.status" placeholder="全部" clearable class="search-select-sm">
             <el-option label="在院" value="IN_RESIDENCE" />
             <el-option label="已退住" value="CHECKED_OUT" />
           </el-select>
         </el-form-item>
         <el-form-item label="护理级别">
-          <el-select v-model="query.careLevelId" placeholder="全部" clearable style="width: 140px">
+          <el-select v-model="query.careLevelId" placeholder="全部" clearable class="search-select-md">
             <el-option v-for="cl in careLevels" :key="cl.id" :label="cl.levelName" :value="cl.id" />
           </el-select>
         </el-form-item>
@@ -115,7 +115,7 @@ onMounted(async () => {
         <template #empty>
           <el-empty description="暂无老人数据" />
         </template>
-        <el-table-column prop="name" label="姓名" width="90" />
+        <el-table-column prop="name" label="姓名" min-width="90" />
         <el-table-column prop="gender" label="性别" width="60">
           <template #default="{ row }">{{ genderMap[row.gender] || '-' }}</template>
         </el-table-column>
@@ -250,6 +250,10 @@ onMounted(async () => {
   padding: 16px 20px 0;
   border-radius: 10px;
   border: 1px solid #ebeef5;
+
+  .search-input { width: 160px; }
+  .search-select-sm { width: 120px; }
+  .search-select-md { width: 140px; }
 }
 
 .table-card {

@@ -84,21 +84,21 @@ onMounted(async () => {
     <div class="search-bar">
       <el-form :model="query" inline>
         <el-form-item label="老人">
-          <el-select v-model="query.residentId" placeholder="全部" clearable filterable style="width: 150px">
+          <el-select v-model="query.residentId" placeholder="全部" clearable filterable class="search-input">
             <el-option v-for="r in residents" :key="r.id" :label="r.name" :value="r.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="query.status" placeholder="全部" clearable style="width: 100px">
+          <el-select v-model="query.status" placeholder="全部" clearable class="search-select">
             <el-option label="正常" value="NORMAL" />
             <el-option label="异常" value="ABNORMAL" />
           </el-select>
         </el-form-item>
         <el-form-item label="日期">
-          <el-date-picker v-model="query.startDate" type="date" placeholder="开始" style="width: 130px" />
+          <el-date-picker v-model="query.startDate" type="date" placeholder="开始" class="search-date" />
         </el-form-item>
         <el-form-item label="至">
-          <el-date-picker v-model="query.endDate" type="date" placeholder="结束" style="width: 130px" />
+          <el-date-picker v-model="query.endDate" type="date" placeholder="结束" class="search-date" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" :icon="Search" @click="fetchData">查询</el-button>
@@ -113,20 +113,20 @@ onMounted(async () => {
         <template #empty>
           <el-empty description="暂无健康记录" />
         </template>
-        <el-table-column prop="residentName" label="老人" width="90" />
-        <el-table-column prop="temperature" label="体温(℃)" width="90">
+        <el-table-column prop="residentName" label="老人" min-width="90" />
+        <el-table-column prop="temperature" label="体温(℃)" min-width="90">
           <template #default="{ row }">
             <span :style="{ color: row.temperature > 37.2 ? '#f56c6c' : '' }">{{ row.temperature ?? '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="血压" width="110">
+        <el-table-column label="血压" min-width="110">
           <template #default="{ row }">
             {{ row.bloodSystolic ?? '-' }}/{{ row.bloodDiastolic ?? '-' }}
           </template>
         </el-table-column>
         <el-table-column prop="heartRate" label="心率" width="70" />
         <el-table-column prop="bloodSugar" label="血糖" width="70" />
-        <el-table-column prop="weight" label="体重(kg)" width="90" />
+        <el-table-column prop="weight" label="体重(kg)" min-width="80" />
         <el-table-column prop="oxygen" label="血氧(%)" width="80" />
         <el-table-column prop="status" label="状态" width="70">
           <template #default="{ row }">
@@ -249,6 +249,10 @@ onMounted(async () => {
   padding: 16px 20px 0;
   border-radius: 10px;
   border: 1px solid #ebeef5;
+
+  .search-input { width: 150px; }
+  .search-select { width: 100px; }
+  .search-date { width: 130px; }
 }
 
 .table-card {
