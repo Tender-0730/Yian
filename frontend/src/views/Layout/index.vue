@@ -24,7 +24,15 @@ const menuItems = computed(() =>
   router.options.routes
     .find(r => r.path === '/')
     .children.filter(r => !r.meta?.hidden)
-    .map(r => ({ path: `/${r.path}`, title: r.meta?.title, icon: r.meta?.icon })),
+    .map(r => ({
+      path: r.path,
+      title: r.meta?.title,
+      icon: r.meta?.icon,
+      children: r.children?.filter(c => !c.meta?.hidden).map(c => ({
+        path: `${r.path}/${c.path}`,
+        title: c.meta?.title,
+      })),
+    })),
 )
 
 const activeMenu = computed(() => route.path)
@@ -70,8 +78,8 @@ const handleCommand = async key => {
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="profile" :icon="UserFilled">个人资料</el-dropdown-item>
-              <el-dropdown-item command="password" :icon="EditPen">修改密码</el-dropdown-item>
+              <el-dropdown-item command="user-center/profile" :icon="UserFilled">个人资料</el-dropdown-item>
+              <el-dropdown-item command="user-center/password" :icon="EditPen">修改密码</el-dropdown-item>
               <el-dropdown-item divided command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -80,10 +88,21 @@ const handleCommand = async key => {
       <el-container class="layout-body">
         <el-aside width="220px" class="layout-aside">
           <el-menu :default-active="activeMenu" router class="side-menu">
-            <el-menu-item v-for="item in menuItems" :key="item.path" :index="item.path">
-              <el-icon><component :is="iconMap[item.icon]" /></el-icon>
-              <span>{{ item.title }}</span>
-            </el-menu-item>
+            <template v-for="item in menuItems" :key="item.path">
+              <el-sub-menu v-if="item.children?.length" :index="item.path">
+                <template #title>
+                  <el-icon><component :is="iconMap[item.icon]" /></el-icon>
+                  <span>{{ item.title }}</span>
+                </template>
+                <el-menu-item v-for="child in item.children" :key="child.path" :index="'/' + child.path">
+                  {{ child.title }}
+                </el-menu-item>
+              </el-sub-menu>
+              <el-menu-item v-else :index="'/' + item.path">
+                <el-icon><component :is="iconMap[item.icon]" /></el-icon>
+                <span>{{ item.title }}</span>
+              </el-menu-item>
+            </template>
           </el-menu>
         </el-aside>
         <el-main class="layout-main">

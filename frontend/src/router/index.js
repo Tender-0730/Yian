@@ -52,16 +52,22 @@ const router = createRouter({
           meta: { title: '膳食管理', icon: 'Dish' },
         },
         {
-          path: 'profile',
-          name: 'Profile',
-          component: () => import('@/views/User/Profile.vue'),
-          meta: { title: '个人资料', icon: 'UserFilled', hidden: true },
-        },
-        {
-          path: 'password',
-          name: 'Password',
-          component: () => import('@/views/User/Password.vue'),
-          meta: { title: '修改密码', hidden: true },
+          path: 'user-center',
+          meta: { title: '个人中心', icon: 'UserFilled' },
+          children: [
+            {
+              path: 'profile',
+              name: 'Profile',
+              component: () => import('@/views/User/Profile.vue'),
+              meta: { title: '个人资料' },
+            },
+            {
+              path: 'password',
+              name: 'Password',
+              component: () => import('@/views/User/Password.vue'),
+              meta: { title: '修改密码' },
+            },
+          ],
         },
       ],
     },

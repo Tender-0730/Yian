@@ -168,8 +168,13 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑老人信息' : '新增老人'" width="680px" destroy-on-close>
+    <!-- 新增/编辑抽屉 -->
+    <el-drawer
+      v-model="dialogVisible"
+      :title="isEdit ? '编辑老人信息' : '新增老人'"
+      size="560px"
+      destroy-on-close
+    >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-row :gutter="20">
           <el-col :span="12">
@@ -242,11 +247,11 @@ onMounted(async () => {
           </el-col>
         </el-row>
       </el-form>
-      <template #footer>
+      <div class="drawer-footer">
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSave">保存</el-button>
-      </template>
-    </el-dialog>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -295,5 +300,14 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
+}
+
+.drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  margin-top: 24px;
+  border-top: 1px solid #ebeef5;
 }
 </style>
