@@ -4,8 +4,14 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import {
-  Odometer, User, OfficeBuilding, FirstAidKit, Dish,
-  UserFilled, EditPen, SwitchButton
+  Odometer,
+  User,
+  OfficeBuilding,
+  FirstAidKit,
+  Dish,
+  UserFilled,
+  EditPen,
+  SwitchButton,
 } from '@element-plus/icons-vue'
 
 const userStore = useUserStore()
@@ -17,9 +23,8 @@ const iconMap = { Odometer, User, OfficeBuilding, FirstAidKit, Dish, UserFilled,
 const menuItems = computed(() =>
   router.options.routes
     .find(r => r.path === '/')
-    .children
-    .filter(r => !r.meta?.hidden)
-    .map(r => ({ path: `/${r.path}`, title: r.meta?.title, icon: r.meta?.icon }))
+    .children.filter(r => !r.meta?.hidden)
+    .map(r => ({ path: `/${r.path}`, title: r.meta?.title, icon: r.meta?.icon })),
 )
 
 const activeMenu = computed(() => route.path)
@@ -34,10 +39,12 @@ const avatarText = computed(() => {
   return name.charAt(0)
 })
 
-const handleCommand = async (key) => {
+const handleCommand = async key => {
   if (key === 'logout') {
     await ElMessageBox.confirm('你确认要退出吗？', '温馨提示', {
-      type: 'warning', confirmButtonText: '确认', cancelButtonText: '取消'
+      type: 'warning',
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
     })
     userStore.logout()
     router.push('/login')
@@ -118,8 +125,16 @@ const handleCommand = async (key) => {
     display: flex;
     align-items: center;
     gap: 12px;
-    .logo { width: 36px; height: 36px; }
-    .system-name { font-size: 18px; font-weight: 600; color: #303133; letter-spacing: 0.5px; }
+    .logo {
+      width: 36px;
+      height: 36px;
+    }
+    .system-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #303133;
+      letter-spacing: 0.5px;
+    }
   }
 
   .user-trigger {
@@ -131,7 +146,9 @@ const handleCommand = async (key) => {
     border-radius: 6px;
     transition: background 0.2s;
 
-    &:hover { background: #f5f7fa; }
+    &:hover {
+      background: #f5f7fa;
+    }
 
     .avatar {
       width: 32px;
@@ -146,12 +163,20 @@ const handleCommand = async (key) => {
       font-weight: 600;
     }
 
-    .username { font-size: 14px; color: #303133; }
-    .arrow { font-size: 12px; color: #909399; }
+    .username {
+      font-size: 14px;
+      color: #303133;
+    }
+    .arrow {
+      font-size: 12px;
+      color: #909399;
+    }
   }
 }
 
-.layout-body { height: calc(100vh - 60px); }
+.layout-body {
+  height: calc(100vh - 60px);
+}
 
 .layout-aside {
   background: #fff;
@@ -169,8 +194,15 @@ const handleCommand = async (key) => {
       line-height: 44px;
       transition: all 0.2s;
 
-      &:hover { background: #ecf5ff; color: #409eff; }
-      &.is-active { background: linear-gradient(135deg, #ecf5ff 0%, #e8f9e8 100%); color: #409eff; font-weight: 600; }
+      &:hover {
+        background: #ecf5ff;
+        color: #409eff;
+      }
+      &.is-active {
+        background: linear-gradient(135deg, #ecf5ff 0%, #e8f9e8 100%);
+        color: #409eff;
+        font-weight: 600;
+      }
     }
   }
 }
@@ -194,8 +226,11 @@ const handleCommand = async (key) => {
 }
 
 /* 页面切换动画 */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+.fade-enter-active,
+.fade-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 .fade-enter-from {
   opacity: 0;

@@ -16,7 +16,9 @@ onMounted(async () => {
   loading.value = true
   try {
     resident.value = await getResidentById(route.params.id)
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
@@ -89,8 +91,14 @@ onMounted(async () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .page-header {

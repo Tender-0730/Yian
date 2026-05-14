@@ -1,36 +1,36 @@
 <script setup>
-import { ref } from "vue";
-import { defineProps } from "vue";
-import { defineExpose } from "vue";
-import { defineEmits } from "vue";
-const emit = defineEmits(["formSubmit", "formCancel"]);
+import { ref } from 'vue'
+import { defineProps } from 'vue'
+import { defineExpose } from 'vue'
+import { defineEmits } from 'vue'
+const emit = defineEmits(['formSubmit', 'formCancel'])
 
-const props = defineProps(["title"]);
-let showDrawer = ref(false); //默认隐藏抽屉
+const props = defineProps(['title'])
+let showDrawer = ref(false) //默认隐藏抽屉
 
 //打开/关闭抽屉
 const open = () => {
-  showDrawer.value = true;
-};
+  showDrawer.value = true
+}
 
 const close = () => {
-  showDrawer.value = false;
-};
+  showDrawer.value = false
+}
 
 const cancelClick = () => {
-  emit("formCancel");
-};
+  emit('formCancel')
+}
 
 //确认
 const confirmClick = () => {
-  emit("formSubmit");
-};
+  emit('formSubmit')
+}
 
 //将open()和close()暴露给父组件
 defineExpose({
   open,
   close,
-});
+})
 </script>
 
 <template>

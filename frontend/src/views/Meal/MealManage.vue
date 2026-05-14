@@ -20,7 +20,7 @@ const mealTypeOptions = [
   { label: '早餐', value: 'BREAKFAST', color: 'warning' },
   { label: '午餐', value: 'LUNCH', color: 'success' },
   { label: '晚餐', value: 'DINNER', color: '' },
-  { label: '加餐', value: 'SNACK', color: 'info' }
+  { label: '加餐', value: 'SNACK', color: 'info' },
 ]
 const mealTypeMap = Object.fromEntries(mealTypeOptions.map(o => [o.value, o.label]))
 
@@ -32,7 +32,7 @@ const rules = {
   residentId: [{ required: true, message: '请选择老人', trigger: 'change' }],
   mealDate: [{ required: true, message: '请选择日期', trigger: 'change' }],
   mealType: [{ required: true, message: '请选择餐别', trigger: 'change' }],
-  content: [{ required: true, message: '请输入膳食内容', trigger: 'blur' }]
+  content: [{ required: true, message: '请输入膳食内容', trigger: 'blur' }],
 }
 
 const fetchData = async () => {
@@ -45,7 +45,9 @@ const fetchData = async () => {
     const res = await pageMeals(params)
     tableData.value = res.records || []
     pagination.total = res.total || 0
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 
 const showDialog = (row = null) => {
@@ -68,7 +70,7 @@ const handleSave = async () => {
   fetchData()
 }
 
-const handleDelete = async (row) => {
+const handleDelete = async row => {
   await ElMessageBox.confirm('确定删除该膳食记录吗？', '确认删除', { type: 'warning' })
   await deleteMeal(row.id)
   ElMessage.success('已删除')
@@ -201,8 +203,14 @@ onMounted(async () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .search-bar {
@@ -211,9 +219,15 @@ onMounted(async () => {
   border-radius: 10px;
   border: 1px solid #ebeef5;
 
-  .search-input { width: 150px; }
-  .search-select { width: 100px; }
-  .search-date { width: 140px; }
+  .search-input {
+    width: 150px;
+  }
+  .search-select {
+    width: 100px;
+  }
+  .search-date {
+    width: 140px;
+  }
 }
 
 .table-card {

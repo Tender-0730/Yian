@@ -13,7 +13,7 @@ const loading = ref(false)
 const form = reactive({
   oldPassword: '',
   newPassword: '',
-  rePassword: ''
+  rePassword: '',
 })
 
 // 密码强度计算
@@ -41,12 +41,16 @@ const rules = {
   newPassword: [
     { required: true, message: '请输入新密码', trigger: 'blur' },
     { pattern: /^\S{6,15}$/, message: '密码 6-15 位非空字符', trigger: 'blur' },
-    { validator: (_, value, callback) => value === form.oldPassword ? callback(new Error('新密码不能与原密码相同')) : callback(), trigger: 'blur' }
+    {
+      validator: (_, value, callback) =>
+        value === form.oldPassword ? callback(new Error('新密码不能与原密码相同')) : callback(),
+      trigger: 'blur',
+    },
   ],
   rePassword: [
     { required: true, message: '请再次输入新密码', trigger: 'blur' },
-    { validator: validateRePass, trigger: 'blur' }
-  ]
+    { validator: validateRePass, trigger: 'blur' },
+  ],
 }
 
 const handleSubmit = async () => {
@@ -82,7 +86,10 @@ const handleSubmit = async () => {
         <!-- 密码强度条 -->
         <div v-if="form.newPassword" class="strength-bar">
           <div class="strength-track">
-            <div class="strength-fill" :style="{ width: strengthLevel.percent + '%', background: strengthLevel.color }" />
+            <div
+              class="strength-fill"
+              :style="{ width: strengthLevel.percent + '%', background: strengthLevel.color }"
+            />
           </div>
           <span class="strength-text" :style="{ color: strengthLevel.color }">
             密码强度：{{ strengthLevel.text }}
@@ -109,8 +116,14 @@ const handleSubmit = async () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .password-card {

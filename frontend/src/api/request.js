@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/user'
 
 const request = axios.create({
   baseURL: '/api',
-  timeout: 15000
+  timeout: 15000,
 })
 
 // 请求拦截器 — 自动注入 JWT token
@@ -39,7 +39,7 @@ request.interceptors.response.use(
       ElMessage.error(error.message || '网络异常')
     }
     return Promise.reject(error)
-  }
+  },
 )
 
 export default request

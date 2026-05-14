@@ -12,10 +12,38 @@ let careChart = null
 let ageChart = null
 
 const statCards = computed(() => [
-  { label: '在册老人', value: stats.value.totalResidents || 0, unit: '人', icon: User, color: '#409eff', bg: 'linear-gradient(135deg, #409eff15, #409eff08)' },
-  { label: '在院老人', value: stats.value.checkedInCount || 0, unit: '人', icon: HomeFilled, color: '#67c23a', bg: 'linear-gradient(135deg, #67c23a15, #67c23a08)' },
-  { label: '特级护理', value: stats.value.specialCareCount || 0, unit: '人', icon: CirclePlus, color: '#e6a23c', bg: 'linear-gradient(135deg, #e6a23c15, #e6a23c08)' },
-  { label: '入住率', value: stats.value.occupancyRate || '0%', unit: '', icon: TrendCharts, color: '#9b59b6', bg: 'linear-gradient(135deg, #9b59b615, #9b59b608)' },
+  {
+    label: '在册老人',
+    value: stats.value.totalResidents || 0,
+    unit: '人',
+    icon: User,
+    color: '#409eff',
+    bg: 'linear-gradient(135deg, #409eff15, #409eff08)',
+  },
+  {
+    label: '在院老人',
+    value: stats.value.checkedInCount || 0,
+    unit: '人',
+    icon: HomeFilled,
+    color: '#67c23a',
+    bg: 'linear-gradient(135deg, #67c23a15, #67c23a08)',
+  },
+  {
+    label: '特级护理',
+    value: stats.value.specialCareCount || 0,
+    unit: '人',
+    icon: CirclePlus,
+    color: '#e6a23c',
+    bg: 'linear-gradient(135deg, #e6a23c15, #e6a23c08)',
+  },
+  {
+    label: '入住率',
+    value: stats.value.occupancyRate || '0%',
+    unit: '',
+    icon: TrendCharts,
+    color: '#9b59b6',
+    bg: 'linear-gradient(135deg, #9b59b615, #9b59b608)',
+  },
 ])
 
 const initCareChart = () => {
@@ -25,16 +53,18 @@ const initCareChart = () => {
   careChart.setOption({
     tooltip: { trigger: 'item', formatter: '{b}: {c} 人 ({d}%)' },
     legend: { bottom: 0, textStyle: { color: '#606266' } },
-    series: [{
-      name: '护理级别',
-      type: 'pie',
-      radius: ['45%', '72%'],
-      center: ['50%', '45%'],
-      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 3 },
-      label: { show: false },
-      emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
-      data: stats.value.careLevelDistribution
-    }]
+    series: [
+      {
+        name: '护理级别',
+        type: 'pie',
+        radius: ['45%', '72%'],
+        center: ['50%', '45%'],
+        itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 3 },
+        label: { show: false },
+        emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
+        data: stats.value.careLevelDistribution,
+      },
+    ],
   })
 }
 
@@ -48,15 +78,17 @@ const initAgeChart = () => {
     grid: { top: 10, left: 0, right: 0, bottom: 0, containLabel: true },
     xAxis: { type: 'category', data: stats.value.ageDistribution.map(i => i.name), axisLabel: { color: '#606266' } },
     yAxis: { type: 'value', show: false },
-    series: [{
-      type: 'bar',
-      data: stats.value.ageDistribution.map((i, idx) => ({
-        value: i.value,
-        itemStyle: { color: colors[idx % colors.length], borderRadius: [6, 6, 0, 0] }
-      })),
-      barMaxWidth: 80,
-      barCategoryGap: '30%',
-    }]
+    series: [
+      {
+        type: 'bar',
+        data: stats.value.ageDistribution.map((i, idx) => ({
+          value: i.value,
+          itemStyle: { color: colors[idx % colors.length], borderRadius: [6, 6, 0, 0] },
+        })),
+        barMaxWidth: 80,
+        barCategoryGap: '30%',
+      },
+    ],
   })
 }
 
@@ -130,8 +162,14 @@ onBeforeUnmount(() => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .stat-grid {
@@ -208,6 +246,8 @@ onBeforeUnmount(() => {
     border-left: 3px solid #409eff;
   }
 
-  .chart-box { height: 300px; }
+  .chart-box {
+    height: 300px;
+  }
 }
 </style>

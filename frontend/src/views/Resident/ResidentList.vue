@@ -22,19 +22,30 @@ const statusMap = { IN_RESIDENCE: '在院', CHECKED_OUT: '已退住' }
 
 function createEmptyForm() {
   return {
-    id: null, name: '', gender: null, age: null, birthday: '', idCard: '', phone: '',
-    emergencyName: '', emergencyPhone: '', emergencyRelation: '', admissionDate: '',
-    medicalHistory: '', allergies: '', remark: ''
+    id: null,
+    name: '',
+    gender: null,
+    age: null,
+    birthday: '',
+    idCard: '',
+    phone: '',
+    emergencyName: '',
+    emergencyPhone: '',
+    emergencyRelation: '',
+    admissionDate: '',
+    medicalHistory: '',
+    allergies: '',
+    remark: '',
   }
 }
 
 const rules = {
   name: [
     { required: true, message: '姓名不能为空', trigger: 'blur' },
-    { min: 1, max: 20, message: '姓名长度 1-20', trigger: 'blur' }
+    { min: 1, max: 20, message: '姓名长度 1-20', trigger: 'blur' },
   ],
   gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
-  phone: [{ pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }]
+  phone: [{ pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }],
 }
 
 const fetchData = async () => {
@@ -47,7 +58,9 @@ const fetchData = async () => {
     const res = await pageResidents(params)
     tableData.value = res.records || []
     pagination.total = res.total || 0
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 
 const showDialog = (row = null) => {
@@ -70,7 +83,7 @@ const handleSave = async () => {
   fetchData()
 }
 
-const handleDelete = async (row) => {
+const handleDelete = async row => {
   await ElMessageBox.confirm(`确定删除老人"${row.name}"吗？此操作不可恢复。`, '确认删除', { type: 'warning' })
   await deleteResident(row.id)
   ElMessage.success('已删除')
@@ -133,7 +146,9 @@ onMounted(async () => {
         <el-table-column prop="roomNumber" label="房间" width="80" />
         <el-table-column label="操作" width="170" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" :icon="View" link type="primary" @click="router.push(`/residents/${row.id}`)">详情</el-button>
+            <el-button size="small" :icon="View" link type="primary" @click="router.push(`/residents/${row.id}`)"
+              >详情</el-button
+            >
             <el-button size="small" :icon="Edit" link type="primary" @click="showDialog(row)">编辑</el-button>
             <el-button size="small" :icon="Delete" link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
@@ -241,8 +256,14 @@ onMounted(async () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .search-bar {
@@ -251,9 +272,15 @@ onMounted(async () => {
   border-radius: 10px;
   border: 1px solid #ebeef5;
 
-  .search-input { width: 160px; }
-  .search-select-sm { width: 120px; }
-  .search-select-md { width: 140px; }
+  .search-input {
+    width: 160px;
+  }
+  .search-select-sm {
+    width: 120px;
+  }
+  .search-select-md {
+    width: 140px;
+  }
 }
 
 .table-card {

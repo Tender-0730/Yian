@@ -8,7 +8,7 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: () => import('@/views/Login/Login.vue'),
-      meta: { title: '登录' }
+      meta: { title: '登录' },
     },
     {
       path: '/',
@@ -19,53 +19,53 @@ const router = createRouter({
           path: 'dashboard',
           name: 'Dashboard',
           component: () => import('@/views/Dashboard/Dashboard.vue'),
-          meta: { title: '仪表盘', icon: 'Odometer' }
+          meta: { title: '仪表盘', icon: 'Odometer' },
         },
         {
           path: 'residents',
           name: 'ResidentList',
           component: () => import('@/views/Resident/ResidentList.vue'),
-          meta: { title: '老人管理', icon: 'User' }
+          meta: { title: '老人管理', icon: 'User' },
         },
         {
           path: 'residents/:id',
           name: 'ResidentDetail',
           component: () => import('@/views/Resident/ResidentDetail.vue'),
-          meta: { title: '老人详情', hidden: true }
+          meta: { title: '老人详情', hidden: true },
         },
         {
           path: 'rooms',
           name: 'RoomManage',
           component: () => import('@/views/Room/RoomManage.vue'),
-          meta: { title: '房间管理', icon: 'OfficeBuilding' }
+          meta: { title: '房间管理', icon: 'OfficeBuilding' },
         },
         {
           path: 'health-records',
           name: 'HealthRecords',
           component: () => import('@/views/Health/HealthRecords.vue'),
-          meta: { title: '健康记录', icon: 'FirstAidKit' }
+          meta: { title: '健康记录', icon: 'FirstAidKit' },
         },
         {
           path: 'meals',
           name: 'Meals',
           component: () => import('@/views/Meal/MealManage.vue'),
-          meta: { title: '膳食管理', icon: 'Dish' }
+          meta: { title: '膳食管理', icon: 'Dish' },
         },
         {
           path: 'profile',
           name: 'Profile',
           component: () => import('@/views/User/Profile.vue'),
-          meta: { title: '个人资料', icon: 'UserFilled', hidden: true }
+          meta: { title: '个人资料', icon: 'UserFilled', hidden: true },
         },
         {
           path: 'password',
           name: 'Password',
           component: () => import('@/views/User/Password.vue'),
-          meta: { title: '修改密码', hidden: true }
-        }
-      ]
-    }
-  ]
+          meta: { title: '修改密码', hidden: true },
+        },
+      ],
+    },
+  ],
 })
 
 router.beforeEach((to, from, next) => {

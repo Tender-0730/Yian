@@ -31,7 +31,7 @@ const roomForm = reactive({ floor: 1, roomNumber: '', roomType: 'DOUBLE', capaci
 const roomFormRef = ref(null)
 const roomRules = {
   roomNumber: [{ required: true, message: '请输入房间号', trigger: 'blur' }],
-  capacity: [{ required: true, message: '请输入床位数', trigger: 'blur' }]
+  capacity: [{ required: true, message: '请输入床位数', trigger: 'blur' }],
 }
 
 // 办理入住
@@ -40,22 +40,24 @@ const checkInForm = reactive({ residentId: null, bedId: null, checkInDate: '', r
 const checkInFormRef = ref(null)
 const checkInRules = {
   residentId: [{ required: true, message: '请选择老人', trigger: 'change' }],
-  bedId: [{ required: true, message: '请选择床位', trigger: 'change' }]
+  bedId: [{ required: true, message: '请选择床位', trigger: 'change' }],
 }
 
-const statusTag = (s) => s === 'AVAILABLE' ? 'success' : 'warning'
-const statusLabel = (s) => s === 'AVAILABLE' ? '空闲' : '已占用'
+const statusTag = s => (s === 'AVAILABLE' ? 'success' : 'warning')
+const statusLabel = s => (s === 'AVAILABLE' ? '空闲' : '已占用')
 
-const loadBuildings = async () => { buildings.value = await listBuildings() }
+const loadBuildings = async () => {
+  buildings.value = await listBuildings()
+}
 
-const selectBuilding = async (id) => {
+const selectBuilding = async id => {
   activeBuildingId.value = id
   activeRoomId.value = null
   beds.value = []
   rooms.value = await listRoomsByBuilding(id)
 }
 
-const selectRoom = async (id) => {
+const selectRoom = async id => {
   activeRoomId.value = id
   beds.value = await listBedsByRoom(id)
 }
@@ -70,7 +72,7 @@ const handleCreateRoom = async () => {
   selectBuilding(activeBuildingId.value)
 }
 
-const openCheckIn = (bed) => {
+const openCheckIn = bed => {
   checkInForm.bedId = bed.id
   checkInForm.residentId = null
   checkInForm.checkInDate = ''
@@ -88,7 +90,7 @@ const handleCheckIn = async () => {
   loadBuildings()
 }
 
-const handleCheckOut = async (bed) => {
+const handleCheckOut = async bed => {
   await ElMessageBox.confirm(`确定为 ${bed.bedNumber} 办理退住吗？`, '确认退住', { type: 'warning' })
   await checkOut(bed.recordId)
   ElMessage.success('退住办理成功')
@@ -113,7 +115,8 @@ onMounted(async () => {
           <div class="panel-body">
             <div v-if="!buildings.length" class="empty-hint">暂无楼栋</div>
             <div
-              v-for="b in buildings" :key="b.id"
+              v-for="b in buildings"
+              :key="b.id"
               class="list-item"
               :class="{ active: activeBuildingId === b.id }"
               @click="selectBuilding(b.id)"
@@ -130,7 +133,9 @@ onMounted(async () => {
         <div class="panel-card">
           <div class="panel-header">
             房间
-            <el-button v-if="activeBuildingId" size="small" :icon="Plus" type="primary" link @click="roomDialog = true">新增</el-button>
+            <el-button v-if="activeBuildingId" size="small" :icon="Plus" type="primary" link @click="roomDialog = true"
+              >新增</el-button
+            >
           </div>
           <div class="panel-body">
             <div v-if="!activeBuildingId" class="empty-hint">请先选择楼栋</div>
@@ -139,7 +144,8 @@ onMounted(async () => {
               <div v-for="[floor, floorRooms] in roomsByFloor" :key="floor" class="floor-group">
                 <div class="floor-label">{{ floor }}F</div>
                 <div
-                  v-for="r in floorRooms" :key="r.id"
+                  v-for="r in floorRooms"
+                  :key="r.id"
                   class="list-item"
                   :class="{ active: activeRoomId === r.id }"
                   @click="selectRoom(r.id)"
@@ -187,7 +193,9 @@ onMounted(async () => {
               </el-table-column>
               <el-table-column label="操作" width="160" align="center">
                 <template #default="{ row }">
-                  <el-button v-if="row.status === 'AVAILABLE'" size="small" type="primary" @click="openCheckIn(row)">办理入住</el-button>
+                  <el-button v-if="row.status === 'AVAILABLE'" size="small" type="primary" @click="openCheckIn(row)"
+                    >办理入住</el-button
+                  >
                   <el-button v-else size="small" type="danger" @click="handleCheckOut(row)">办理退住</el-button>
                 </template>
               </el-table-column>
@@ -230,11 +238,19 @@ onMounted(async () => {
     <el-dialog v-model="checkInDialog" title="办理入住" width="420px" destroy-on-close>
       <el-form ref="checkInFormRef" :model="checkInForm" :rules="checkInRules" label-width="80px">
         <el-form-item label="床位号">
-          <el-input :model-value="checkInForm.bedId ? beds.find(b => b.id === checkInForm.bedId)?.bedNumber : ''" disabled />
+          <el-input
+            :model-value="checkInForm.bedId ? beds.find(b => b.id === checkInForm.bedId)?.bedNumber : ''"
+            disabled
+          />
         </el-form-item>
         <el-form-item label="老人" prop="residentId">
           <el-select v-model="checkInForm.residentId" placeholder="请选择老人" filterable style="width: 100%">
-            <el-option v-for="r in residents" :key="r.id" :label="`${r.name}（${r.gender === 1 ? '男' : '女'}·${r.age}岁）`" :value="r.id" />
+            <el-option
+              v-for="r in residents"
+              :key="r.id"
+              :label="`${r.name}（${r.gender === 1 ? '男' : '女'}·${r.age}岁）`"
+              :value="r.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="入住日期" prop="checkInDate">
@@ -258,8 +274,14 @@ onMounted(async () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .panel-card {
@@ -300,16 +322,32 @@ onMounted(async () => {
   transition: all 0.2s;
   margin-bottom: 4px;
 
-  &:hover { background: #f5f7fa; }
+  &:hover {
+    background: #f5f7fa;
+  }
 
   &.active {
     background: linear-gradient(135deg, #ecf5ff, #e8f9e8);
-    .item-title { color: #409eff; font-weight: 600; }
+    .item-title {
+      color: #409eff;
+      font-weight: 600;
+    }
   }
 
-  .item-title { font-size: 14px; color: #303133; }
-  .item-sub { font-size: 12px; color: #909399; margin-top: 2px; }
-  .item-row { display: flex; justify-content: space-between; align-items: center; }
+  .item-title {
+    font-size: 14px;
+    color: #303133;
+  }
+  .item-sub {
+    font-size: 12px;
+    color: #909399;
+    margin-top: 2px;
+  }
+  .item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .floor-group {

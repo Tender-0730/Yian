@@ -18,14 +18,24 @@ const form = reactive(createEmptyForm())
 
 function createEmptyForm() {
   return {
-    id: null, residentId: null, temperature: null, bloodSystolic: null, bloodDiastolic: null,
-    heartRate: null, bloodSugar: null, weight: null, oxygen: null,
-    status: 'NORMAL', abnormal: '', notes: '', recordedAt: ''
+    id: null,
+    residentId: null,
+    temperature: null,
+    bloodSystolic: null,
+    bloodDiastolic: null,
+    heartRate: null,
+    bloodSugar: null,
+    weight: null,
+    oxygen: null,
+    status: 'NORMAL',
+    abnormal: '',
+    notes: '',
+    recordedAt: '',
   }
 }
 
 const rules = {
-  residentId: [{ required: true, message: '请选择老人', trigger: 'change' }]
+  residentId: [{ required: true, message: '请选择老人', trigger: 'change' }],
 }
 
 const fetchData = async () => {
@@ -38,7 +48,9 @@ const fetchData = async () => {
     const res = await pageHealthRecords(params)
     tableData.value = res.records || []
     pagination.total = res.total || 0
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 
 const showDialog = (row = null) => {
@@ -61,7 +73,7 @@ const handleSave = async () => {
   fetchData()
 }
 
-const handleDelete = async (row) => {
+const handleDelete = async row => {
   await ElMessageBox.confirm('确定删除该健康记录吗？', '确认删除', { type: 'warning' })
   await deleteHealthRecord(row.id)
   ElMessage.success('已删除')
@@ -69,7 +81,7 @@ const handleDelete = async (row) => {
 }
 
 // 异常行高亮
-const rowClassName = ({ row }) => row.status === 'ABNORMAL' ? 'row-abnormal' : ''
+const rowClassName = ({ row }) => (row.status === 'ABNORMAL' ? 'row-abnormal' : '')
 
 onMounted(async () => {
   const res = await pageResidents({ size: 999 })
@@ -120,9 +132,7 @@ onMounted(async () => {
           </template>
         </el-table-column>
         <el-table-column label="血压" min-width="110">
-          <template #default="{ row }">
-            {{ row.bloodSystolic ?? '-' }}/{{ row.bloodDiastolic ?? '-' }}
-          </template>
+          <template #default="{ row }"> {{ row.bloodSystolic ?? '-' }}/{{ row.bloodDiastolic ?? '-' }} </template>
         </el-table-column>
         <el-table-column prop="heartRate" label="心率" width="70" />
         <el-table-column prop="bloodSugar" label="血糖" width="70" />
@@ -168,7 +178,14 @@ onMounted(async () => {
         <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item label="体温(℃)">
-              <el-input-number v-model="form.temperature" :precision="1" :step="0.1" :min="35" :max="42" style="width: 100%" />
+              <el-input-number
+                v-model="form.temperature"
+                :precision="1"
+                :step="0.1"
+                :min="35"
+                :max="42"
+                style="width: 100%"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -188,12 +205,26 @@ onMounted(async () => {
           </el-col>
           <el-col :span="12">
             <el-form-item label="血糖">
-              <el-input-number v-model="form.bloodSugar" :precision="1" :step="0.1" :min="1" :max="30" style="width: 100%" />
+              <el-input-number
+                v-model="form.bloodSugar"
+                :precision="1"
+                :step="0.1"
+                :min="1"
+                :max="30"
+                style="width: 100%"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="体重(kg)">
-              <el-input-number v-model="form.weight" :precision="1" :step="0.1" :min="20" :max="200" style="width: 100%" />
+              <el-input-number
+                v-model="form.weight"
+                :precision="1"
+                :step="0.1"
+                :min="20"
+                :max="200"
+                style="width: 100%"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -240,8 +271,14 @@ onMounted(async () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .search-bar {
@@ -250,9 +287,15 @@ onMounted(async () => {
   border-radius: 10px;
   border: 1px solid #ebeef5;
 
-  .search-input { width: 150px; }
-  .search-select { width: 100px; }
-  .search-date { width: 130px; }
+  .search-input {
+    width: 150px;
+  }
+  .search-select {
+    width: 100px;
+  }
+  .search-date {
+    width: 130px;
+  }
 }
 
 .table-card {

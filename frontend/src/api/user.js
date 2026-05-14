@@ -4,7 +4,7 @@ import request from './request'
 export const getProfile = () => request.get('/users/profile')
 
 /** @returns {Promise<void>} */
-export const updateProfile = (data) => request.put('/users/profile', data)
+export const updateProfile = data => request.put('/users/profile', data)
 
 /** @returns {Promise<void>} */
-export const changePassword = (data) => request.patch('/users/password', data)
+export const changePassword = data => request.patch('/users/password', data)

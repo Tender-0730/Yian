@@ -16,14 +16,14 @@ const form = reactive({
   username: '',
   password: '',
   realName: '',
-  rePassword: ''
+  rePassword: '',
 })
 
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { pattern: /^\S{6,15}$/, message: '密码 6-15 位非空字符', trigger: 'blur' }
+    { pattern: /^\S{6,15}$/, message: '密码 6-15 位非空字符', trigger: 'blur' },
   ],
   realName: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
   rePassword: [
@@ -32,9 +32,10 @@ const rules = {
       validator: (_, value, callback) => {
         if (value !== form.password) callback(new Error('两次密码不一致'))
         else callback()
-      }, trigger: 'blur'
-    }
-  ]
+      },
+      trigger: 'blur',
+    },
+  ],
 }
 
 const handleSubmit = async () => {
@@ -52,7 +53,9 @@ const handleSubmit = async () => {
       ElMessage.success('登录成功')
       router.push('/dashboard')
     }
-  } finally { loading.value = false }
+  } finally {
+    loading.value = false
+  }
 }
 
 watch(isRegister, () => {
@@ -105,7 +108,13 @@ watch(isRegister, () => {
             </el-form-item>
 
             <el-form-item v-if="isRegister" prop="rePassword">
-              <el-input v-model="form.rePassword" type="password" placeholder="确认密码" :prefix-icon="Lock" show-password />
+              <el-input
+                v-model="form.rePassword"
+                type="password"
+                placeholder="确认密码"
+                :prefix-icon="Lock"
+                show-password
+              />
             </el-form-item>
 
             <el-button type="primary" class="submit-btn" :loading="loading" @click="handleSubmit">
@@ -139,19 +148,25 @@ watch(isRegister, () => {
     opacity: 0.12;
   }
   .shape-1 {
-    width: 500px; height: 500px;
+    width: 500px;
+    height: 500px;
     background: #409eff;
-    top: -200px; left: -100px;
+    top: -200px;
+    left: -100px;
   }
   .shape-2 {
-    width: 400px; height: 400px;
+    width: 400px;
+    height: 400px;
     background: #67c23a;
-    bottom: -150px; right: -100px;
+    bottom: -150px;
+    right: -100px;
   }
   .shape-3 {
-    width: 200px; height: 200px;
+    width: 200px;
+    height: 200px;
     background: #e6a23c;
-    top: 50%; left: 50%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
   }
 }
@@ -167,7 +182,9 @@ watch(isRegister, () => {
   overflow: hidden;
   transition: all 0.5s ease;
 
-  &.flipped { flex-direction: row-reverse; }
+  &.flipped {
+    flex-direction: row-reverse;
+  }
 }
 
 .brand-panel {
@@ -204,7 +221,11 @@ watch(isRegister, () => {
   }
 
   .brand-footer {
-    p { font-size: 14px; opacity: 0.7; margin-bottom: 12px; }
+    p {
+      font-size: 14px;
+      opacity: 0.7;
+      margin-bottom: 12px;
+    }
     .switch-btn {
       background: transparent;
       border: 2px solid #fff;
@@ -214,7 +235,10 @@ watch(isRegister, () => {
       font-size: 15px;
       cursor: pointer;
       transition: all 0.3s;
-      &:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
     }
   }
 }
@@ -261,7 +285,11 @@ watch(isRegister, () => {
     border: none;
     margin-top: 8px;
     transition: all 0.3s;
-    &:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(64, 158, 255, 0.4); }
+    &:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(64, 158, 255, 0.4);
+    }
   }
 }
 </style>

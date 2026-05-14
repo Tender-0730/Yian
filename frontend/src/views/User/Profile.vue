@@ -12,7 +12,7 @@ const form = reactive({
   realName: '',
   phone: '',
   email: '',
-  gender: null
+  gender: null,
 })
 
 const avatarText = computed(() => {
@@ -21,7 +21,7 @@ const avatarText = computed(() => {
 })
 
 const rules = {
-  realName: [{ required: true, message: '真实姓名不能为空', trigger: 'blur' }]
+  realName: [{ required: true, message: '真实姓名不能为空', trigger: 'blur' }],
 }
 
 const handleSubmit = async () => {
@@ -41,7 +41,9 @@ onMounted(async () => {
   try {
     const data = await getProfile()
     Object.assign(form, { realName: data.realName, phone: data.phone, email: data.email, gender: data.gender })
-  } catch { /* 错误已统一处理 */ }
+  } catch {
+    /* 错误已统一处理 */
+  }
 })
 </script>
 
@@ -99,8 +101,14 @@ onMounted(async () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .profile-card {
@@ -133,8 +141,16 @@ onMounted(async () => {
   }
 
   .avatar-info {
-    .avatar-name { font-size: 20px; font-weight: 600; color: #303133; }
-    .avatar-role { font-size: 13px; color: #909399; margin-top: 2px; }
+    .avatar-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: #303133;
+    }
+    .avatar-role {
+      font-size: 13px;
+      color: #909399;
+      margin-top: 2px;
+    }
   }
 }
 
