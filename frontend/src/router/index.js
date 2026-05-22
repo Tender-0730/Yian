@@ -52,6 +52,42 @@ const router = createRouter({
           meta: { title: '膳食管理', icon: 'Dish' },
         },
         {
+          path: 'outings',
+          name: 'OutingManage',
+          component: () => import('@/views/Outing/OutingManage.vue'),
+          meta: { title: '外出管理', icon: 'Place' },
+        },
+        {
+          path: 'nurses',
+          name: 'NurseManage',
+          component: () => import('@/views/Nurse/NurseManage.vue'),
+          meta: { title: '护工管理', icon: 'Avatar' },
+        },
+        {
+          path: 'nurse-schedules',
+          name: 'ScheduleManage',
+          component: () => import('@/views/Nurse/ScheduleManage.vue'),
+          meta: { title: '排班管理', icon: 'Calendar' },
+        },
+        {
+          path: 'drugs',
+          name: 'DrugManage',
+          component: () => import('@/views/Drug/DrugManage.vue'),
+          meta: { title: '药品管理', icon: 'Goods' },
+        },
+        {
+          path: 'prescriptions',
+          name: 'PrescriptionManage',
+          component: () => import('@/views/Drug/PrescriptionManage.vue'),
+          meta: { title: '处方用药', icon: 'Collection' },
+        },
+        {
+          path: 'fees',
+          name: 'FeeManage',
+          component: () => import('@/views/Fee/BillManage.vue'),
+          meta: { title: '费用管理', icon: 'Money' },
+        },
+        {
           path: 'user-center',
           meta: { title: '个人中心', icon: 'UserFilled' },
           children: [

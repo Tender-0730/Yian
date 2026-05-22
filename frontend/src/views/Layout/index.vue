@@ -9,6 +9,12 @@ import {
   OfficeBuilding,
   FirstAidKit,
   Dish,
+  Place,
+  Avatar,
+  Calendar,
+  Goods,
+  Collection,
+  Money,
   UserFilled,
   EditPen,
   SwitchButton,
@@ -18,7 +24,7 @@ const userStore = useUserStore()
 const router = useRouter()
 const route = useRoute()
 
-const iconMap = { Odometer, User, OfficeBuilding, FirstAidKit, Dish, UserFilled, EditPen }
+const iconMap = { Odometer, User, OfficeBuilding, FirstAidKit, Dish, Place, Avatar, Calendar, Goods, Collection, Money, UserFilled, EditPen }
 
 const menuItems = computed(() =>
   router.options.routes

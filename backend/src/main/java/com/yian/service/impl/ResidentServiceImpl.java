@@ -38,6 +38,15 @@ public class ResidentServiceImpl implements ResidentService {
     private final CheckInRecordMapper checkInRecordMapper;
     private final BedMapper bedMapper;
     private final RoomMapper roomMapper;
+    private final HealthRecordMapper healthRecordMapper;
+    private final MealRecordMapper mealRecordMapper;
+    private final DietaryRestrictionMapper dietaryRestrictionMapper;
+    private final BillMapper billMapper;
+    private final BillItemMapper billItemMapper;
+    private final PaymentRecordMapper paymentRecordMapper;
+    private final DrugPrescriptionMapper drugPrescriptionMapper;
+    private final DrugRecordMapper drugRecordMapper;
+    private final OutingRecordMapper outingRecordMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -195,6 +204,21 @@ public class ResidentServiceImpl implements ResidentService {
         healthRecordMapper.delete(new LambdaQueryWrapper<HealthRecord>().eq(HealthRecord::getResidentId, id));
         mealRecordMapper.delete(new LambdaQueryWrapper<MealRecord>().eq(MealRecord::getResidentId, id));
         dietaryRestrictionMapper.delete(new LambdaQueryWrapper<DietaryRestriction>().eq(DietaryRestriction::getResidentId, id));
+
+        // 新模块级联删除
+        outingRecordMapper.delete(new LambdaQueryWrapper<OutingRecord>().eq(OutingRecord::getResidentId, id));
+        drugRecordMapper.delete(new LambdaQueryWrapper<DrugRecord>().eq(DrugRecord::getResidentId, id));
+        drugPrescriptionMapper.delete(new LambdaQueryWrapper<DrugPrescription>().eq(DrugPrescription::getResidentId, id));
+        paymentRecordMapper.delete(new LambdaQueryWrapper<PaymentRecord>().eq(PaymentRecord::getResidentId, id));
+
+        // 账单明细先按 bill_id 删，再删账单
+        List<Long> billIds = billMapper.selectList(
+                new LambdaQueryWrapper<Bill>().eq(Bill::getResidentId, id))
+                .stream().map(Bill::getId).toList();
+        if (!billIds.isEmpty()) {
+            billItemMapper.delete(new LambdaQueryWrapper<BillItem>().in(BillItem::getBillId, billIds));
+        }
+        billMapper.delete(new LambdaQueryWrapper<Bill>().eq(Bill::getResidentId, id));
 
         residentMapper.deleteById(id);
         log.info("删除老人及关联数据成功: id={}", id);
