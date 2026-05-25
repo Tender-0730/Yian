@@ -43,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
 
     @Override
+    @Transactional
     public LoginVO login(LoginRequest request) {
         Authentication authentication;
         try {
@@ -109,6 +110,7 @@ public class AuthServiceImpl implements AuthService {
      * 而不是延长旧 token 的有效期（无状态 JWT 无法撤销，通过轮换降低风险）。
      */
     @Override
+    @Transactional(readOnly = true)
     public LoginVO refreshToken(RefreshTokenRequest request) {
         String refreshToken = request.getRefreshToken();
         try {
@@ -154,6 +156,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserInfoVO me() {
         LoginUser loginUser = (LoginUser) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();

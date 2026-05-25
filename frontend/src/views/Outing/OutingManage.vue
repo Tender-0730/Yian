@@ -63,24 +63,30 @@ const showDialog = () => {
 const handleSave = async () => {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
-  await createOuting(form)
-  ElMessage.success('登记成功')
-  dialogVisible.value = false
-  fetchData()
+  try {
+    await createOuting(form)
+    ElMessage.success('登记成功')
+    dialogVisible.value = false
+    fetchData()
+  } catch { /* 错误已由拦截器统一提示 */ }
 }
 
 const handleReturn = async row => {
   await ElMessageBox.confirm('确认该老人已返回吗？', '确认返回', { type: 'info' })
-  await returnOuting(row.id)
-  ElMessage.success('已登记返回')
-  fetchData()
+  try {
+    await returnOuting(row.id)
+    ElMessage.success('已登记返回')
+    fetchData()
+  } catch { /* 错误已由拦截器统一提示 */ }
 }
 
 const handleCancel = async row => {
   await ElMessageBox.confirm('确定取消该外出记录吗？', '确认取消', { type: 'warning' })
-  await cancelOuting(row.id)
-  ElMessage.success('已取消')
-  fetchData()
+  try {
+    await cancelOuting(row.id)
+    ElMessage.success('已取消')
+    fetchData()
+  } catch { /* 错误已由拦截器统一提示 */ }
 }
 
 const showOverdue = async () => {

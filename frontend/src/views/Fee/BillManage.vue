@@ -138,7 +138,6 @@ const handlePay = async () => {
     fetchBills()
   } catch { /* 错误已由拦截器统一提示 */ }
 }
-}
 
 const handleCancel = async row => {
   await ElMessageBox.confirm('确定作废该账单吗？（仅未支付且无缴费记录的可作废）', '确认作废', { type: 'warning' })

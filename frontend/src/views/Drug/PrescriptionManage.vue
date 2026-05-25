@@ -4,7 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Check, Close } from '@element-plus/icons-vue'
 import {
   pagePrescriptions, createPrescription, updatePrescription,
-  pageDrugDicts, pageDrugRecords, listPending, createDrugRecord,
+  pageDrugDicts, listPending, createDrugRecord,
 } from '@/api/drug'
 import { pageResidents } from '@/api/resident'
 

@@ -1,8 +1,8 @@
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Plus, Edit, Delete, Refresh } from '@element-plus/icons-vue'
-import { pageSchedules, createSchedule, updateSchedule, deleteSchedule, pageNurses, pageHandovers, createHandover } from '@/api/nurse'
+import { Plus, Refresh } from '@element-plus/icons-vue'
+import { pageSchedules, createSchedule, updateSchedule, deleteSchedule, pageNurses, createHandover } from '@/api/nurse'
 
 const loading = ref(false)
 const schedules = ref([])
@@ -88,10 +88,12 @@ const showHandover = row => {
 const handleHandoverSave = async () => {
   const valid = await handoverFormRef.value.validate().catch(() => false)
   if (!valid) return
-  await createHandover(handoverForm)
-  ElMessage.success('交接记录已创建')
-  handoverDialog.value = false
-  fetchData()
+  try {
+    await createHandover(handoverForm)
+    ElMessage.success('交接记录已创建')
+    handoverDialog.value = false
+    fetchData()
+  } catch { /* 错误已由拦截器统一提示 */ }
 }
 
 // 按日期+班次生成二维矩阵

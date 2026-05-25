@@ -10,6 +10,7 @@ import com.yian.entity.*;
 import com.yian.enums.BedStatusEnum;
 import com.yian.enums.CheckInStatusEnum;
 import com.yian.enums.ResidentStatusEnum;
+import com.yian.enums.RoomStatusEnum;
 import com.yian.mapper.*;
 import com.yian.service.RoomService;
 import com.yian.vo.BedVO;
@@ -185,7 +186,7 @@ public class RoomServiceImpl implements RoomService {
         updateRoom.setOccupied(room.getOccupied() + 1);
         // 满员时更新房间状态为 FULL
         if (room.getCapacity() != null && updateRoom.getOccupied() >= room.getCapacity()) {
-            updateRoom.setStatus("FULL");
+            updateRoom.setStatus(RoomStatusEnum.FULL.getCode());
         }
         roomMapper.updateById(updateRoom);
 
@@ -233,7 +234,7 @@ public class RoomServiceImpl implements RoomService {
         updateRoom.setOccupied(Math.max(0, room.getOccupied() - 1));
         // 退住后若无占用人，恢复状态为 IN_USE
         if (updateRoom.getOccupied() == 0) {
-            updateRoom.setStatus("IN_USE");
+            updateRoom.setStatus(RoomStatusEnum.IN_USE.getCode());
         }
         roomMapper.updateById(updateRoom);
 
