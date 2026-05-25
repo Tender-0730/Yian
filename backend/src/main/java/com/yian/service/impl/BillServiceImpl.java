@@ -205,19 +205,25 @@ public class BillServiceImpl implements BillService {
         int count = 0;
 
         for (Resident resident : residents) {
-            // 计算当月有效天数
+            // 计算当月有效天数（处理同月入院+退住的场景）
             LocalDate monthStart = ym.atDay(1);
             LocalDate monthEnd = ym.atEndOfMonth();
             int effectiveDays = totalDaysOfMonth;
 
-            if (resident.getAdmissionDate() != null && resident.getAdmissionDate().isAfter(monthStart)) {
+            boolean admittedInMonth = resident.getAdmissionDate() != null
+                    && !resident.getAdmissionDate().isBefore(monthStart)
+                    && !resident.getAdmissionDate().isAfter(monthEnd);
+            boolean dischargedInMonth = ResidentStatusEnum.CHECKED_OUT.getCode().equals(resident.getStatus())
+                    && resident.getDischargeDate() != null
+                    && !resident.getDischargeDate().isBefore(monthStart)
+                    && !resident.getDischargeDate().isAfter(monthEnd);
+
+            if (admittedInMonth && dischargedInMonth) {
+                effectiveDays = (int) ChronoUnit.DAYS.between(resident.getAdmissionDate(), resident.getDischargeDate()) + 1;
+            } else if (admittedInMonth) {
                 effectiveDays = (int) ChronoUnit.DAYS.between(resident.getAdmissionDate(), monthEnd) + 1;
-            }
-            if (ResidentStatusEnum.CHECKED_OUT.getCode().equals(resident.getStatus()) && resident.getDischargeDate() != null) {
-                LocalDate discharge = resident.getDischargeDate();
-                if (!discharge.isBefore(monthStart) && !discharge.isAfter(monthEnd)) {
-                    effectiveDays = (int) ChronoUnit.DAYS.between(monthStart, discharge) + 1;
-                }
+            } else if (dischargedInMonth) {
+                effectiveDays = (int) ChronoUnit.DAYS.between(monthStart, resident.getDischargeDate()) + 1;
             }
             if (effectiveDays <= 0) continue;
 
@@ -265,7 +271,13 @@ public class BillServiceImpl implements BillService {
             bill.setPaidAmount(BigDecimal.ZERO);
             bill.setStatus(BillStatusEnum.UNPAID.getCode());
             bill.setGeneratedAt(LocalDateTime.now());
-            billMapper.insert(bill);
+            try {
+                billMapper.insert(bill);
+            } catch (org.springframework.dao.DuplicateKeyException e) {
+                log.warn("账单已存在（并发冲突），跳过: residentId={}, billPeriod={}",
+                        resident.getId(), request.getBillPeriod());
+                continue;
+            }
 
             // 创建明细
             for (BillItem item : items) {

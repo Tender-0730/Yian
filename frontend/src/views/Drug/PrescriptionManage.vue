@@ -48,18 +48,23 @@ const showDialog = () => {
 const handleSave = async () => {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
-  await createPrescription(form)
-  ElMessage.success('处方创建成功')
-  dialogVisible.value = false
-  fetchPrescriptions()
-  fetchPending()
+  try {
+    await createPrescription(form)
+    ElMessage.success('处方创建成功')
+    dialogVisible.value = false
+    fetchPrescriptions()
+    fetchPending()
+  } catch { /* 错误已由拦截器统一提示 */ }
 }
 
 const handleStop = async row => {
-  await updatePrescription(row.id, { ...row, status: 'STOPPED' })
-  ElMessage.success('已停用')
-  fetchPrescriptions()
-  fetchPending()
+  await ElMessageBox.confirm('确定停用该处方吗？', '确认停用', { type: 'warning' })
+  try {
+    await updatePrescription(row.id, { ...row, status: 'STOPPED' })
+    ElMessage.success('已停用')
+    fetchPrescriptions()
+    fetchPending()
+  } catch { /* 错误已由拦截器统一提示 */ }
 }
 
 const handleTakeDrug = async item => {
@@ -74,15 +79,29 @@ const handleTakeDrug = async item => {
 }
 
 const handleMissDrug = async item => {
-  await createDrugRecord({ prescriptionId: item.prescriptionId, status: 'MISSED' })
-  ElMessage.success('已记录漏服')
-  fetchPending()
+  await ElMessageBox.confirm(
+    `确认 ${item.residentName} 漏服「${item.drugName}」？`,
+    '确认漏服',
+    { type: 'warning', confirmButtonText: '确认漏服', cancelButtonText: '取消' },
+  )
+  try {
+    await createDrugRecord({ prescriptionId: item.prescriptionId, status: 'MISSED' })
+    ElMessage.success('已记录漏服')
+    fetchPending()
+  } catch { /* 错误已由拦截器统一提示 */ }
 }
 
 const handleRefuseDrug = async item => {
-  await createDrugRecord({ prescriptionId: item.prescriptionId, status: 'REFUSED' })
-  ElMessage.success('已记录拒服')
-  fetchPending()
+  await ElMessageBox.confirm(
+    `确认 ${item.residentName} 拒服「${item.drugName}」？`,
+    '确认拒服',
+    { type: 'warning', confirmButtonText: '确认拒服', cancelButtonText: '取消' },
+  )
+  try {
+    await createDrugRecord({ prescriptionId: item.prescriptionId, status: 'REFUSED' })
+    ElMessage.success('已记录拒服')
+    fetchPending()
+  } catch { /* 错误已由拦截器统一提示 */ }
 }
 
 const statusMap = { ACTIVE: '用药中', STOPPED: '已停用' }

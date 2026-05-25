@@ -126,10 +126,18 @@ const handlePay = async () => {
     ElMessage.warning('请输入有效支付金额')
     return
   }
-  await payBill(payForm.billId, { amount: payForm.amount, paymentMethod: payForm.paymentMethod, remark: payForm.remark })
-  ElMessage.success('缴费成功')
-  payDialog.value = false
-  fetchBills()
+  await ElMessageBox.confirm(
+    `确认收款 ¥${payForm.amount}？`,
+    '确认缴费',
+    { type: 'info', confirmButtonText: '确认收款', cancelButtonText: '取消' },
+  )
+  try {
+    await payBill(payForm.billId, { amount: payForm.amount, paymentMethod: payForm.paymentMethod, remark: payForm.remark })
+    ElMessage.success('缴费成功')
+    payDialog.value = false
+    fetchBills()
+  } catch { /* 错误已由拦截器统一提示 */ }
+}
 }
 
 const handleCancel = async row => {
