@@ -10,11 +10,14 @@ import com.yian.dto.*;
 import com.yian.entity.*;
 import com.yian.enums.BillStatusEnum;
 import com.yian.enums.ChargeUnitEnum;
+import com.yian.enums.ResidentStatusEnum;
 import com.yian.mapper.*;
+import com.yian.security.LoginUser;
 import com.yian.service.BillService;
 import com.yian.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -188,7 +191,7 @@ public class BillServiceImpl implements BillService {
         if (request.getResidentId() != null) {
             residentWrapper.eq(Resident::getId, request.getResidentId());
         } else {
-            residentWrapper.eq(Resident::getStatus, "CHECKED_IN");
+            residentWrapper.eq(Resident::getStatus, ResidentStatusEnum.CHECKED_IN.getCode());
         }
         List<Resident> residents = residentMapper.selectList(residentWrapper);
         if (CollUtil.isEmpty(residents)) return 0;
@@ -210,7 +213,7 @@ public class BillServiceImpl implements BillService {
             if (resident.getAdmissionDate() != null && resident.getAdmissionDate().isAfter(monthStart)) {
                 effectiveDays = (int) ChronoUnit.DAYS.between(resident.getAdmissionDate(), monthEnd) + 1;
             }
-            if ("CHECKED_OUT".equals(resident.getStatus()) && resident.getDischargeDate() != null) {
+            if (ResidentStatusEnum.CHECKED_OUT.getCode().equals(resident.getStatus()) && resident.getDischargeDate() != null) {
                 LocalDate discharge = resident.getDischargeDate();
                 if (!discharge.isBefore(monthStart) && !discharge.isAfter(monthEnd)) {
                     effectiveDays = (int) ChronoUnit.DAYS.between(monthStart, discharge) + 1;
@@ -317,6 +320,7 @@ public class BillServiceImpl implements BillService {
         pr.setAmount(request.getAmount());
         pr.setPaymentMethod(request.getPaymentMethod());
         pr.setPaidAt(LocalDateTime.now());
+        pr.setReceivedBy(getCurrentUserId());
         pr.setRemark(request.getRemark());
         paymentRecordMapper.insert(pr);
 
@@ -357,5 +361,13 @@ public class BillServiceImpl implements BillService {
                         .residentId(e.getKey()).residentName(nameMap.get(e.getKey()))
                         .totalArrears(e.getValue()).unpaidBillCount(countMap.get(e.getKey()))
                         .build()).toList();
+    }
+
+    private static Long getCurrentUserId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof LoginUser user) {
+            return user.getUserId();
+        }
+        return null;
     }
 }

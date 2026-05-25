@@ -52,6 +52,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
+            // refreshToken 仅用于刷新，不允许访问业务接口
+            if (jwtUtils.isRefreshToken(token)) {
+                writeError(response, ResultCode.UNAUTHORIZED.getCode(), "不允许使用refreshToken访问业务接口");
+                return;
+            }
+
             Long userId = jwtUtils.getUserIdFromToken(token);
             String username = jwtUtils.getUsernameFromToken(token);
 
