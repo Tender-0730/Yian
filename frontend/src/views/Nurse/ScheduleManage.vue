@@ -8,7 +8,6 @@ const loading = ref(false)
 const schedules = ref([])
 const nurses = ref([])
 const query = reactive({ page: 1, size: 50 })
-const today = ref('')
 
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -108,7 +107,6 @@ const buildMatrix = () => {
 }
 
 onMounted(async () => {
-  today.value = new Date().toISOString().slice(0, 10)
   const nRes = await pageNurses({ size: 999 })
   nurses.value = nRes.records || []
   await fetchData()
