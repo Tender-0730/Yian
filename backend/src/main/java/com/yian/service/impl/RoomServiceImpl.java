@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -73,12 +75,37 @@ public class RoomServiceImpl implements RoomService {
     @Transactional(readOnly = true)
     public List<BedVO> listBedsByRoom(Long roomId) {
         List<Bed> beds = bedMapper.selectByRoomId(roomId);
-        return beds.stream().map(b -> BedVO.builder()
-                .id(b.getId())
-                .roomId(b.getRoomId())
-                .bedNumber(b.getBedNumber())
-                .status(b.getStatus())
-                .build()).toList();
+        if (CollUtil.isEmpty(beds)) {
+            return List.of();
+        }
+
+        // 查询当前入住中的记录，关联床位和老人名
+        List<Long> bedIds = beds.stream().map(Bed::getId).toList();
+        List<CheckInRecord> activeRecords = checkInRecordMapper.selectList(
+                new LambdaQueryWrapper<CheckInRecord>()
+                        .in(CheckInRecord::getBedId, bedIds)
+                        .eq(CheckInRecord::getStatus, CheckInStatusEnum.CHECKED_IN.getCode()));
+        Map<Long, CheckInRecord> recordMap = activeRecords.stream()
+                .collect(Collectors.toMap(CheckInRecord::getBedId, r -> r, (a, b) -> a));
+        Map<Long, String> residentNameMap = Map.of();
+        if (!activeRecords.isEmpty()) {
+            List<Long> residentIds = activeRecords.stream().map(CheckInRecord::getResidentId).distinct().toList();
+            residentNameMap = residentMapper.selectBatchIds(residentIds).stream()
+                    .collect(Collectors.toMap(Resident::getId, Resident::getName));
+        }
+
+        Map<Long, String> finalNameMap = residentNameMap;
+        return beds.stream().map(b -> {
+            CheckInRecord rec = recordMap.get(b.getId());
+            return BedVO.builder()
+                    .id(b.getId())
+                    .roomId(b.getRoomId())
+                    .bedNumber(b.getBedNumber())
+                    .status(b.getStatus())
+                    .recordId(rec != null ? rec.getId() : null)
+                    .residentName(rec != null ? finalNameMap.getOrDefault(rec.getResidentId(), "") : null)
+                    .build();
+        }).toList();
     }
 
     @Override
@@ -137,10 +164,6 @@ public class RoomServiceImpl implements RoomService {
         if (bed == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "床位不存在");
         }
-        // 只有空闲床位才能入住，防止并发重复入住
-        if (!BedStatusEnum.AVAILABLE.getCode().equals(bed.getStatus())) {
-            throw new BusinessException("该床位已被占用");
-        }
 
         CheckInRecord record = new CheckInRecord();
         record.setResidentId(request.getResidentId());
@@ -150,10 +173,11 @@ public class RoomServiceImpl implements RoomService {
         record.setRemark(request.getRemark());
         checkInRecordMapper.insert(record);
 
-        Bed updateBed = new Bed();
-        updateBed.setId(request.getBedId());
-        updateBed.setStatus(BedStatusEnum.OCCUPIED.getCode());
-        bedMapper.updateById(updateBed);
+        // 原子更新：只有空闲床位才能入住，防止并发重复入住
+        int rows = bedMapper.occupyIfAvailable(request.getBedId());
+        if (rows == 0) {
+            throw new BusinessException("该床位已被占用");
+        }
 
         Room room = roomMapper.selectById(bed.getRoomId());
         Room updateRoom = new Room();

@@ -23,4 +23,8 @@ public class DrugInventoryLog {
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
+
+    @TableLogic
+    @TableField("is_deleted")
+    private Integer isDeleted;
 }

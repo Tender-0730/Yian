@@ -57,15 +57,19 @@ const showDialog = (row = null) => {
 const handleSave = async () => {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
-  if (isEdit.value) {
-    await updateNurse(form.id, form)
-    ElMessage.success('编辑成功')
-  } else {
-    await createNurse(form)
-    ElMessage.success('新增成功')
+  try {
+    if (isEdit.value) {
+      await updateNurse(form.id, form)
+      ElMessage.success('编辑成功')
+    } else {
+      await createNurse(form)
+      ElMessage.success('新增成功')
+    }
+    dialogVisible.value = false
+    fetchData()
+  } catch {
+    // 错误已由拦截器统一提示
   }
-  dialogVisible.value = false
-  fetchData()
 }
 
 const handleDelete = async row => {

@@ -78,15 +78,19 @@ const showConfigDialog = (row = null) => {
 const handleConfigSave = async () => {
   const valid = await configFormRef.value.validate().catch(() => false)
   if (!valid) return
-  if (isConfigEdit.value) {
-    await updateFeeConfig(configForm.id, configForm)
-    ElMessage.success('编辑成功')
-  } else {
-    await createFeeConfig(configForm)
-    ElMessage.success('新增成功')
+  try {
+    if (isConfigEdit.value) {
+      await updateFeeConfig(configForm.id, configForm)
+      ElMessage.success('编辑成功')
+    } else {
+      await createFeeConfig(configForm)
+      ElMessage.success('新增成功')
+    }
+    configDialog.value = false
+    fetchConfigs()
+  } catch {
+    // 错误已由拦截器统一提示
   }
-  configDialog.value = false
-  fetchConfigs()
 }
 
 const handleConfigDelete = async row => {

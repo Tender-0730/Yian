@@ -326,6 +326,6 @@ public class NurseServiceImpl implements NurseService {
         Map<Long, String> userNameMap = buildUserNameMap(userIds);
         return nurses.stream()
                 .collect(Collectors.toMap(NurseInfo::getId,
-                        n -> userNameMap.getOrDefault(n.getUserId(), null)));
+                        n -> userNameMap.getOrDefault(n.getUserId(), "未知")));
     }
 }

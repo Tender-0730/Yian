@@ -5,12 +5,16 @@ import com.yian.entity.Bed;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
 @Mapper
 public interface BedMapper extends BaseMapper<Bed> {
 
-    @Select("SELECT * FROM bed WHERE room_id = #{roomId}")
+    @Select("SELECT * FROM bed WHERE room_id = #{roomId} AND is_deleted = 0")
     List<Bed> selectByRoomId(@Param("roomId") Long roomId);
+
+    @Update("UPDATE bed SET status = 'OCCUPIED' WHERE id = #{id} AND status = 'AVAILABLE'")
+    int occupyIfAvailable(@Param("id") Long id);
 }

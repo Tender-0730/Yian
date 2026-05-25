@@ -25,4 +25,8 @@ public class CheckInRecord {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
+
+    @TableLogic
+    @TableField("is_deleted")
+    private Integer isDeleted;
 }

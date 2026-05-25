@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Check, Close } from '@element-plus/icons-vue'
 import {
   pagePrescriptions, createPrescription, updatePrescription,
@@ -63,6 +63,11 @@ const handleStop = async row => {
 }
 
 const handleTakeDrug = async item => {
+  await ElMessageBox.confirm(
+    `确认 ${item.residentName} 已服用「${item.drugName}」${item.dosage || ''}？`,
+    '确认服药',
+    { type: 'info', confirmButtonText: '确认服药', cancelButtonText: '取消' },
+  )
   await createDrugRecord({ prescriptionId: item.prescriptionId, status: 'TAKEN' })
   ElMessage.success('已记录服药')
   fetchPending()

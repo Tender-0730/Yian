@@ -29,5 +29,6 @@ public class SysUser {
     private LocalDateTime updatedAt;
 
     @TableLogic
+    @TableField("is_deleted")
     private Integer isDeleted;
 }

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Plus, Edit, Delete, Warning } from '@element-plus/icons-vue'
+import { Search, Plus, Edit, Delete } from '@element-plus/icons-vue'
 import { pageDrugDicts, createDrugDict, updateDrugDict, deleteDrugDict } from '@/api/drug'
 
 const loading = ref(false)
@@ -46,15 +46,19 @@ const showDialog = (row = null) => {
 const handleSave = async () => {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
-  if (isEdit.value) {
-    await updateDrugDict(form.id, form)
-    ElMessage.success('编辑成功')
-  } else {
-    await createDrugDict(form)
-    ElMessage.success('新增成功')
+  try {
+    if (isEdit.value) {
+      await updateDrugDict(form.id, form)
+      ElMessage.success('编辑成功')
+    } else {
+      await createDrugDict(form)
+      ElMessage.success('新增成功')
+    }
+    dialogVisible.value = false
+    fetchData()
+  } catch {
+    // 错误已由拦截器统一提示
   }
-  dialogVisible.value = false
-  fetchData()
 }
 
 const handleDelete = async row => {

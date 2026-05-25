@@ -10,4 +10,6 @@ public class BedVO {
     private Long roomId;
     private String bedNumber;
     private String status;
+    private Long recordId;
+    private String residentName;
 }

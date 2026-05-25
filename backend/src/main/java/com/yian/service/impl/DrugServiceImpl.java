@@ -174,18 +174,24 @@ public class DrugServiceImpl implements DrugService {
     private void changeQuantity(Long inventoryId, int delta, String changeType, String reason) {
         DrugInventory inv = drugInventoryMapper.selectById(inventoryId);
         int before = inv.getQuantity();
-        int after = before + delta;
-        if (after < 0) after = 0;
 
-        inv.setQuantity(after);
-        if (after <= 0) {
-            inv.setStatus(DrugInventoryStatusEnum.DEPLETED.getCode());
-        } else if (inv.getAlertThreshold() != null && after <= inv.getAlertThreshold()) {
-            inv.setStatus(DrugInventoryStatusEnum.LOW_STOCK.getCode());
-        } else {
-            inv.setStatus(DrugInventoryStatusEnum.ACTIVE.getCode());
+        // 原子更新库存，防止并发丢失更新
+        int rows = drugInventoryMapper.atomicUpdateQuantity(inventoryId, delta);
+        if (rows == 0) {
+            throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "库存不足，当前库存: " + before);
         }
-        drugInventoryMapper.updateById(inv);
+
+        // 重新读取最新库存，更新状态
+        DrugInventory updated = drugInventoryMapper.selectById(inventoryId);
+        int after = updated.getQuantity();
+        if (after <= 0) {
+            updated.setStatus(DrugInventoryStatusEnum.DEPLETED.getCode());
+        } else if (updated.getAlertThreshold() != null && after <= updated.getAlertThreshold()) {
+            updated.setStatus(DrugInventoryStatusEnum.LOW_STOCK.getCode());
+        } else {
+            updated.setStatus(DrugInventoryStatusEnum.ACTIVE.getCode());
+        }
+        drugInventoryMapper.updateById(updated);
 
         DrugInventoryLog logEntry = new DrugInventoryLog();
         logEntry.setInventoryId(inventoryId);

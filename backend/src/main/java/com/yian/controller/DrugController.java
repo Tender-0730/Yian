@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "用药管理")
 @RestController
@@ -68,21 +67,15 @@ public class DrugController {
 
     @Operation(summary = "入库")
     @PostMapping("/drug-inventories/inbound")
-    public Result<Void> inbound(@RequestBody Map<String, Object> body) {
-        Long id = Long.valueOf(body.get("id").toString());
-        int quantity = Integer.parseInt(body.get("quantity").toString());
-        String reason = body.get("reason") != null ? body.get("reason").toString() : null;
-        drugService.inbound(id, quantity, reason);
+    public Result<Void> inbound(@Valid @RequestBody InventoryChangeRequest request) {
+        drugService.inbound(request.getId(), request.getQuantity(), request.getReason());
         return Result.success();
     }
 
     @Operation(summary = "出库")
     @PostMapping("/drug-inventories/outbound")
-    public Result<Void> outbound(@RequestBody Map<String, Object> body) {
-        Long id = Long.valueOf(body.get("id").toString());
-        int quantity = Integer.parseInt(body.get("quantity").toString());
-        String reason = body.get("reason") != null ? body.get("reason").toString() : null;
-        drugService.outbound(id, quantity, reason);
+    public Result<Void> outbound(@Valid @RequestBody InventoryChangeRequest request) {
+        drugService.outbound(request.getId(), request.getQuantity(), request.getReason());
         return Result.success();
     }
 

@@ -12,6 +12,6 @@ public interface ResidentCareLevelMapper extends BaseMapper<ResidentCareLevel> {
     /**
      * 查询某老人当前生效的护理级别（status=ACTIVE 且一个老人同时只有一条生效）。
      */
-    @Select("SELECT * FROM resident_care_level WHERE resident_id = #{residentId} AND status = 'ACTIVE' LIMIT 1")
+    @Select("SELECT * FROM resident_care_level WHERE resident_id = #{residentId} AND status = 'ACTIVE' AND is_deleted = 0 LIMIT 1")
     ResidentCareLevel selectCurrentByResidentId(@Param("residentId") Long residentId);
 }

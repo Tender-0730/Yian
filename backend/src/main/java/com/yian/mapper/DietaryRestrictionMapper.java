@@ -11,6 +11,6 @@ import java.util.List;
 @Mapper
 public interface DietaryRestrictionMapper extends BaseMapper<DietaryRestriction> {
 
-    @Select("SELECT * FROM dietary_restriction WHERE resident_id = #{residentId}")
+    @Select("SELECT * FROM dietary_restriction WHERE resident_id = #{residentId} AND is_deleted = 0")
     List<DietaryRestriction> selectByResidentId(@Param("residentId") Long residentId);
 }

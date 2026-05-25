@@ -17,4 +17,8 @@ public class BillItem {
     private String feeName;
     private BigDecimal amount;
     private String description;
+
+    @TableLogic
+    @TableField("is_deleted")
+    private Integer isDeleted;
 }

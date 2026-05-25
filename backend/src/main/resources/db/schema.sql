@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS sys_role (
     description VARCHAR(200) DEFAULT NULL COMMENT '角色描述',
     created_at  DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_role_code (role_code)
+    UNIQUE KEY uk_role_code (role_code),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='系统角色';
 
 -- 用户角色关联表
@@ -37,7 +38,8 @@ CREATE TABLE IF NOT EXISTS sys_user_role (
     id      BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
     user_id BIGINT NOT NULL COMMENT '用户ID',
     role_id BIGINT NOT NULL COMMENT '角色ID',
-    UNIQUE KEY uk_user_role (user_id, role_id)
+    UNIQUE KEY uk_user_role (user_id, role_id),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户角色关联';
 
 -- 老人信息表
@@ -73,7 +75,8 @@ CREATE TABLE IF NOT EXISTS building (
     floor_count   INT          DEFAULT NULL COMMENT '楼层数',
     description   VARCHAR(200) DEFAULT NULL COMMENT '描述',
     created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_at    DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+    updated_at    DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted    TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='楼栋';
 
 -- 房间表
@@ -90,7 +93,8 @@ CREATE TABLE IF NOT EXISTS room (
     created_at  DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     UNIQUE KEY uk_room (building_id, room_number),
-    INDEX idx_floor (building_id, floor)
+    INDEX idx_floor (building_id, floor),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='房间';
 
 -- 床位表
@@ -101,7 +105,8 @@ CREATE TABLE IF NOT EXISTS bed (
     status      VARCHAR(20) DEFAULT 'AVAILABLE' COMMENT '状态：AVAILABLE-空闲 OCCUPIED-已占用 MAINTENANCE-维修中',
     created_at  DATETIME    DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at  DATETIME    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_bed (room_id, bed_number)
+    UNIQUE KEY uk_bed (room_id, bed_number),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='床位';
 
 -- 入住记录表
@@ -116,7 +121,8 @@ CREATE TABLE IF NOT EXISTS check_in_record (
     created_at     DATETIME    DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at     DATETIME    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_resident (resident_id),
-    INDEX idx_bed (bed_id)
+    INDEX idx_bed (bed_id),
+    is_deleted             TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='入住记录';
 
 -- 护理级别定义表
@@ -129,7 +135,8 @@ CREATE TABLE IF NOT EXISTS care_level (
     sort_order  INT           DEFAULT 0 COMMENT '排序权重',
     created_at  DATETIME      DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at  DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_level_code (level_code)
+    UNIQUE KEY uk_level_code (level_code),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='护理级别';
 
 -- 老人护理级别关联表
@@ -143,7 +150,8 @@ CREATE TABLE IF NOT EXISTS resident_care_level (
     updated_by      BIGINT       DEFAULT NULL COMMENT '操作人ID',
     created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at      DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_resident (resident_id)
+    INDEX idx_resident (resident_id),
+    is_deleted              TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='老人护理级别关联';
 
 -- 健康记录表
@@ -165,7 +173,8 @@ CREATE TABLE IF NOT EXISTS health_record (
     created_at       DATETIME      DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     INDEX idx_resident_time (resident_id, recorded_at),
     INDEX idx_recorded_by (recorded_by),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    is_deleted               TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='健康记录';
 
 -- 膳食记录表
@@ -179,7 +188,8 @@ CREATE TABLE IF NOT EXISTS meal_record (
     created_at  DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     UNIQUE KEY uk_meal (resident_id, meal_date, meal_type),
-    INDEX idx_date (meal_date)
+    INDEX idx_date (meal_date),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='膳食记录';
 
 -- 饮食禁忌表
@@ -190,7 +200,8 @@ CREATE TABLE IF NOT EXISTS dietary_restriction (
     description  VARCHAR(200) DEFAULT NULL COMMENT '描述',
     created_at   DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at   DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_resident (resident_id)
+    INDEX idx_resident (resident_id),
+    is_deleted           TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='饮食禁忌';
 
 -- =====================================================
@@ -208,7 +219,8 @@ CREATE TABLE IF NOT EXISTS fee_config (
     status         VARCHAR(20)   DEFAULT 'ACTIVE' COMMENT '状态：ACTIVE-启用 DISABLED-禁用',
     created_at     DATETIME      DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at     DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_fee_name (fee_name)
+    UNIQUE KEY uk_fee_name (fee_name),
+    is_deleted             TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='费用配置';
 
 -- 账单表
@@ -226,7 +238,8 @@ CREATE TABLE IF NOT EXISTS bill (
     updated_at    DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     UNIQUE KEY uk_bill (resident_id, bill_period),
     INDEX idx_status (status),
-    INDEX idx_resident (resident_id)
+    INDEX idx_resident (resident_id),
+    is_deleted            TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='账单';
 
 -- 账单明细表
@@ -237,7 +250,8 @@ CREATE TABLE IF NOT EXISTS bill_item (
     fee_name      VARCHAR(50)   NOT NULL COMMENT '费用名称快照',
     amount        DECIMAL(10,2) NOT NULL COMMENT '金额快照',
     description   VARCHAR(200)  DEFAULT NULL COMMENT '费用描述',
-    INDEX idx_bill (bill_id)
+    INDEX idx_bill (bill_id),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='账单明细';
 
 -- 缴费记录表
@@ -252,7 +266,8 @@ CREATE TABLE IF NOT EXISTS payment_record (
     remark         VARCHAR(500)  DEFAULT NULL COMMENT '备注',
     created_at     DATETIME      DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     INDEX idx_bill (bill_id),
-    INDEX idx_resident (resident_id)
+    INDEX idx_resident (resident_id),
+    is_deleted             TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='缴费记录';
 
 -- =====================================================
@@ -270,7 +285,8 @@ CREATE TABLE IF NOT EXISTS drug_dict (
     description   VARCHAR(500) DEFAULT NULL COMMENT '说明',
     status        VARCHAR(20)  DEFAULT 'ACTIVE' COMMENT '状态：ACTIVE-启用 DISABLED-禁用',
     created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_at    DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+    updated_at    DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted    TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='药品字典';
 
 -- 药品库存表
@@ -286,7 +302,8 @@ CREATE TABLE IF NOT EXISTS drug_inventory (
     created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at      DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_drug (drug_id),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='药品库存';
 
 -- 出入库记录表
@@ -301,7 +318,8 @@ CREATE TABLE IF NOT EXISTS drug_inventory_log (
     operator_id     BIGINT       DEFAULT NULL COMMENT '操作人ID',
     reason          VARCHAR(200) DEFAULT NULL COMMENT '变更原因',
     created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
-    INDEX idx_inventory (inventory_id)
+    INDEX idx_inventory (inventory_id),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='出入库记录';
 
 -- 用药处方表
@@ -320,7 +338,8 @@ CREATE TABLE IF NOT EXISTS drug_prescription (
     created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at    DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_resident (resident_id),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用药处方';
 
 -- 服药记录表
@@ -336,7 +355,8 @@ CREATE TABLE IF NOT EXISTS drug_record (
     notes           VARCHAR(500) DEFAULT NULL COMMENT '备注',
     created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     INDEX idx_resident_time (resident_id, administered_at),
-    INDEX idx_prescription (prescription_id)
+    INDEX idx_prescription (prescription_id),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='服药记录';
 
 -- =====================================================
@@ -358,7 +378,8 @@ CREATE TABLE IF NOT EXISTS outing_record (
     registered_by        BIGINT       DEFAULT NULL COMMENT '登记人ID',
     created_at           DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     INDEX idx_resident (resident_id),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='外出登记';
 
 -- =====================================================
@@ -377,7 +398,8 @@ CREATE TABLE IF NOT EXISTS nurse_info (
     created_at       DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at       DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     UNIQUE KEY uk_user (user_id),
-    UNIQUE KEY uk_employee_no (employee_no)
+    UNIQUE KEY uk_employee_no (employee_no),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='护工信息';
 
 -- 排班表
@@ -390,7 +412,8 @@ CREATE TABLE IF NOT EXISTS nurse_schedule (
     notes      VARCHAR(500) DEFAULT NULL COMMENT '备注',
     created_at DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_schedule (nurse_id, shift_date, shift_type)
+    UNIQUE KEY uk_schedule (nurse_id, shift_date, shift_type),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='排班表';
 
 -- 交接班记录表
@@ -407,5 +430,6 @@ CREATE TABLE IF NOT EXISTS shift_handover (
     status          VARCHAR(20)  DEFAULT 'PENDING' COMMENT '状态：COMPLETED-已完成 PENDING-待确认',
     created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at      DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX idx_schedule (schedule_id)
+    INDEX idx_schedule (schedule_id),
+    is_deleted      TINYINT(1)    DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='交接班记录';

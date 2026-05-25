@@ -10,6 +10,7 @@ import com.yian.common.ResultCode;
 import com.yian.dto.ResidentPageQuery;
 import com.yian.dto.ResidentSaveRequest;
 import com.yian.entity.*;
+import com.yian.enums.BedStatusEnum;
 import com.yian.enums.CareLevelStatusEnum;
 import com.yian.enums.CheckInStatusEnum;
 import com.yian.mapper.*;
@@ -198,6 +199,28 @@ public class ResidentServiceImpl implements ResidentService {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "老人不存在");
         }
 
+        // 先释放床位和房间占用，再清理入住记录
+        List<CheckInRecord> activeRecords = checkInRecordMapper.selectList(
+                new LambdaQueryWrapper<CheckInRecord>()
+                        .eq(CheckInRecord::getResidentId, id)
+                        .eq(CheckInRecord::getStatus, CheckInStatusEnum.CHECKED_IN.getCode()));
+        for (CheckInRecord rec : activeRecords) {
+            Bed updateBed = new Bed();
+            updateBed.setId(rec.getBedId());
+            updateBed.setStatus(BedStatusEnum.AVAILABLE.getCode());
+            bedMapper.updateById(updateBed);
+
+            Bed bed = bedMapper.selectById(rec.getBedId());
+            if (bed != null) {
+                Room room = roomMapper.selectById(bed.getRoomId());
+                if (room != null) {
+                    Room updateRoom = new Room();
+                    updateRoom.setId(room.getId());
+                    updateRoom.setOccupied(Math.max(0, room.getOccupied() - 1));
+                    roomMapper.updateById(updateRoom);
+                }
+            }
+        }
         // 级联清理关联数据，避免孤立记录导致页面显示空名
         checkInRecordMapper.delete(new LambdaQueryWrapper<CheckInRecord>().eq(CheckInRecord::getResidentId, id));
         residentCareLevelMapper.delete(new LambdaQueryWrapper<ResidentCareLevel>().eq(ResidentCareLevel::getResidentId, id));

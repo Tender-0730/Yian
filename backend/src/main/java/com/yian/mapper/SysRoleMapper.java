@@ -9,6 +9,6 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface SysRoleMapper extends BaseMapper<SysRole> {
 
-    @Select("SELECT * FROM sys_role WHERE role_code = #{roleCode}")
+    @Select("SELECT * FROM sys_role WHERE role_code = #{roleCode} AND is_deleted = 0")
     SysRole selectByRoleCode(@Param("roleCode") String roleCode);
 }
