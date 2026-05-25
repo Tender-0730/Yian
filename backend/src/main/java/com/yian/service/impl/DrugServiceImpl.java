@@ -14,8 +14,10 @@ import com.yian.enums.DrugRecordStatusEnum;
 import com.yian.mapper.*;
 import com.yian.service.DrugService;
 import com.yian.vo.*;
+import com.yian.security.LoginUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -352,6 +354,7 @@ public class DrugServiceImpl implements DrugService {
         r.setDrugId(prescription.getDrugId());
         r.setDrugName(drug != null ? drug.getDrugName() : null);
         r.setAdministeredAt(LocalDateTime.now());
+        r.setAdministeredBy(getCurrentUserId());
         r.setStatus(request.getStatus() != null ? request.getStatus() : DrugRecordStatusEnum.TAKEN.getCode());
         r.setNotes(request.getNotes());
         drugRecordMapper.insert(r);
@@ -435,5 +438,13 @@ public class DrugServiceImpl implements DrugService {
                     .lastTakenTime(lastTakenMap.get(p.getId()))
                     .build();
         }).toList();
+    }
+
+    private static Long getCurrentUserId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof LoginUser user) {
+            return user.getUserId();
+        }
+        return null;
     }
 }

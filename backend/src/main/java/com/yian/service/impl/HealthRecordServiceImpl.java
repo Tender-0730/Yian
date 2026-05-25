@@ -12,10 +12,12 @@ import com.yian.entity.HealthRecord;
 import com.yian.entity.Resident;
 import com.yian.mapper.HealthRecordMapper;
 import com.yian.mapper.ResidentMapper;
+import com.yian.security.LoginUser;
 import com.yian.service.HealthRecordService;
 import com.yian.vo.HealthRecordVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -132,6 +134,7 @@ public class HealthRecordServiceImpl implements HealthRecordService {
         r.setNotes(request.getNotes());
         // 未传 recordedAt 时默认取当前时间
         r.setRecordedAt(request.getRecordedAt() != null ? request.getRecordedAt() : LocalDateTime.now());
+        r.setRecordedBy(getCurrentUserId());
 
         healthRecordMapper.insert(r);
         log.info("新增健康记录成功: id={}, residentId={}", r.getId(), r.getResidentId());
@@ -173,6 +176,14 @@ public class HealthRecordServiceImpl implements HealthRecordService {
         }
         healthRecordMapper.deleteById(id);
         log.info("删除健康记录成功: id={}", id);
+    }
+
+    private static Long getCurrentUserId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof LoginUser user) {
+            return user.getUserId();
+        }
+        return null;
     }
 
     /**

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
-    private static final String INTENSIVE_CARE_CODE = "LEVEL_SPECIAL";
+    private static final String INTENSIVE_CARE_CODE = "INTENSIVE";
 
     private final ResidentMapper residentMapper;
     private final ResidentCareLevelMapper residentCareLevelMapper;

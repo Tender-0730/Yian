@@ -13,10 +13,12 @@ import com.yian.entity.Resident;
 import com.yian.enums.OutingStatusEnum;
 import com.yian.mapper.OutingRecordMapper;
 import com.yian.mapper.ResidentMapper;
+import com.yian.security.LoginUser;
 import com.yian.service.OutingService;
 import com.yian.vo.OutingRecordVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -136,6 +138,7 @@ public class OutingServiceImpl implements OutingService {
         r.setReason(request.getReason());
         r.setNotes(request.getNotes());
         r.setStatus(OutingStatusEnum.OUT.getCode());
+        r.setRegisteredBy(getCurrentUserId());
         outingRecordMapper.insert(r);
         log.info("新增外出登记成功: id={}, residentId={}", r.getId(), r.getResidentId());
         return r.getId();
@@ -201,6 +204,14 @@ public class OutingServiceImpl implements OutingService {
                 .isOverdue(true)
                 .overdueMinutes(Duration.between(r.getExpectedReturnTime(), now).toMinutes())
                 .build()).toList();
+    }
+
+    private static Long getCurrentUserId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof LoginUser user) {
+            return user.getUserId();
+        }
+        return null;
     }
 
     private Map<Long, String> buildResidentNameMap(List<OutingRecord> records) {

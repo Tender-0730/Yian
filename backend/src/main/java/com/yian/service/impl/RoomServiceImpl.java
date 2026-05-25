@@ -183,6 +183,10 @@ public class RoomServiceImpl implements RoomService {
         Room updateRoom = new Room();
         updateRoom.setId(room.getId());
         updateRoom.setOccupied(room.getOccupied() + 1);
+        // 满员时更新房间状态为 FULL
+        if (room.getCapacity() != null && updateRoom.getOccupied() >= room.getCapacity()) {
+            updateRoom.setStatus("FULL");
+        }
         roomMapper.updateById(updateRoom);
 
         Resident updateResident = new Resident();
@@ -227,6 +231,10 @@ public class RoomServiceImpl implements RoomService {
         updateRoom.setId(room.getId());
         // Math.max 防止并发或数据异常时 occupied 出现负数
         updateRoom.setOccupied(Math.max(0, room.getOccupied() - 1));
+        // 退住后若无占用人，恢复状态为 IN_USE
+        if (updateRoom.getOccupied() == 0) {
+            updateRoom.setStatus("IN_USE");
+        }
         roomMapper.updateById(updateRoom);
 
         Resident updateResident = new Resident();
